@@ -1,0 +1,202 @@
+/* ============================================
+   ICON BUTTON COMPONENT STYLES
+   ============================================ */
+
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: var(--border-width-thin) solid transparent;
+  border-radius: var(--radius-lg);
+  transition: var(--transition-all);
+  cursor: pointer;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.icon-btn:focus-visible {
+  outline: none;
+  box-shadow: var(--shadow-focus-ring);
+}
+
+.icon-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* ============================================
+   SIZE VARIANTS
+   ============================================ */
+
+.icon-btn--sm {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-md);
+}
+
+.icon-btn--md {
+  width: 36px;
+  height: 36px;
+}
+
+.icon-btn--lg {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-xl);
+}
+
+/* ============================================
+   COLOR VARIANTS
+   ============================================ */
+
+/* Primary */
+.icon-btn--primary {
+  background-color: var(--color-primary);
+  color: var(--color-text-inverse);
+  border-color: var(--color-primary);
+}
+
+.icon-btn--primary:hover:not(:disabled) {
+  background-color: var(--color-primary-hover);
+  border-color: var(--color-primary-hover);
+}
+
+.icon-btn--primary:active:not(:disabled) {
+  background-color: var(--color-primary-active);
+  border-color: var(--color-primary-active);
+  transform: scale(0.95);
+}
+
+/* Secondary */
+.icon-btn--secondary {
+  background-color: var(--color-bg-tertiary);
+  color: var(--color-text-primary);
+  border-color: var(--color-border-primary);
+}
+
+.icon-btn--secondary:hover:not(:disabled) {
+  background-color: var(--color-bg-hover);
+  border-color: var(--color-border-secondary);
+}
+
+.icon-btn--secondary:active:not(:disabled) {
+  background-color: var(--color-bg-active);
+  transform: scale(0.95);
+}
+
+/* Ghost */
+.icon-btn--ghost {
+  background-color: transparent;
+  color: var(--color-text-secondary);
+  border-color: transparent;
+}
+
+.icon-btn--ghost:hover:not(:disabled) {
+  background-color: var(--color-bg-hover);
+  color: var(--color-text-primary);
+}
+
+.icon-btn--ghost:active:not(:disabled) {
+  background-color: var(--color-bg-active);
+  transform: scale(0.95);
+}
+
+/* Destructive */
+.icon-btn--destructive {
+  background-color: transparent;
+  color: var(--color-error);
+  border-color: transparent;
+}
+
+.icon-btn--destructive:hover:not(:disabled) {
+  background-color: var(--color-error-light);
+}
+
+.icon-btn--destructive:active:not(:disabled) {
+  background-color: var(--color-error-light);
+  transform: scale(0.95);
+}
+
+.icon-btn--destructive:focus-visible {
+  box-shadow: var(--shadow-focus-ring-error);
+}
+
+/* ============================================
+   ICON
+   ============================================ */
+
+.icon-btn__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.icon-btn__icon svg {
+  width: 1em;
+  height: 1em;
+}
+
+.icon-btn--sm .icon-btn__icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+.icon-btn--md .icon-btn__icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.icon-btn--lg .icon-btn__icon svg {
+  width: 24px;
+  height: 24px;
+}
+
+/* ============================================
+   SPINNER
+   ============================================ */
+
+.icon-btn--loading {
+  pointer-events: none;
+}
+
+.icon-btn__spinner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.icon-btn__spinner-icon {
+  width: 1em;
+  height: 1em;
+  animation: icon-btn-spin 1s linear infinite;
+}
+
+.icon-btn--sm .icon-btn__spinner-icon {
+  width: 14px;
+  height: 14px;
+}
+
+.icon-btn--md .icon-btn__spinner-icon {
+  width: 18px;
+  height: 18px;
+}
+
+.icon-btn--lg .icon-btn__spinner-icon {
+  width: 22px;
+  height: 22px;
+}
+
+.icon-btn__spinner-icon circle {
+  stroke-dasharray: 60;
+  stroke-dashoffset: 45;
+}
+
+@keyframes icon-btn-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}

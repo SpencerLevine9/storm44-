@@ -1,0 +1,152 @@
+/* ============================================
+   TABS COMPONENT STYLES
+   ============================================ */
+
+.tabs {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+/* ============================================
+   TAB LIST
+   ============================================ */
+
+.tabs-list {
+  display: flex;
+  gap: var(--spacing-1);
+  padding: var(--spacing-1);
+  background-color: var(--color-bg-tertiary);
+  border-radius: var(--radius-lg);
+  width: fit-content;
+}
+
+/* ============================================
+   TAB BUTTON
+   ============================================ */
+
+.tab {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-2);
+  padding: var(--spacing-2) var(--spacing-3);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+  background-color: transparent;
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: var(--transition-all);
+  white-space: nowrap;
+  user-select: none;
+}
+
+.tab:hover:not(:disabled):not(.tab--selected) {
+  color: var(--color-text-primary);
+  background-color: var(--color-bg-hover);
+}
+
+.tab:focus-visible {
+  outline: none;
+  box-shadow: var(--shadow-focus-ring);
+  z-index: 1;
+}
+
+/* Selected state */
+.tab--selected {
+  color: var(--color-text-primary);
+  background-color: var(--color-bg-primary);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Disabled state */
+.tab--disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ============================================
+   TAB PANEL
+   ============================================ */
+
+.tab-panel {
+  padding: var(--spacing-4) 0;
+  animation: tab-panel-fade-in 200ms ease;
+}
+
+.tab-panel:focus-visible {
+  outline: none;
+}
+
+.tab-panel--hidden {
+  display: none;
+}
+
+@keyframes tab-panel-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ============================================
+   ALTERNATIVE: UNDERLINE STYLE TABS
+   ============================================ */
+
+.tabs--underline .tabs-list {
+  background-color: transparent;
+  padding: 0;
+  gap: var(--spacing-4);
+  border-bottom: var(--border-width-thin) solid var(--color-border-primary);
+  border-radius: 0;
+}
+
+.tabs--underline .tab {
+  padding: var(--spacing-3) var(--spacing-1);
+  border-radius: 0;
+  position: relative;
+}
+
+.tabs--underline .tab::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background-color: var(--color-primary);
+  transform: scaleX(0);
+  transition: transform 200ms ease;
+}
+
+.tabs--underline .tab--selected {
+  color: var(--color-primary);
+  background-color: transparent;
+  box-shadow: none;
+}
+
+.tabs--underline .tab--selected::after {
+  transform: scaleX(1);
+}
+
+.tabs--underline .tab:hover:not(:disabled):not(.tab--selected) {
+  background-color: transparent;
+}
+
+/* ============================================
+   FULL WIDTH TABS
+   ============================================ */
+
+.tabs--full-width .tabs-list {
+  width: 100%;
+}
+
+.tabs--full-width .tab {
+  flex: 1;
+}

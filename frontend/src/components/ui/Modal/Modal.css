@@ -1,0 +1,217 @@
+/* ============================================
+   MODAL COMPONENT STYLES
+   ============================================ */
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-index-modal-backdrop);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-4);
+  background-color: var(--color-bg-overlay);
+  backdrop-filter: var(--backdrop-blur-sm);
+  animation: modal-backdrop-fade-in 200ms ease;
+}
+
+@keyframes modal-backdrop-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* ============================================
+   MODAL CONTAINER
+   ============================================ */
+
+.modal {
+  position: relative;
+  z-index: var(--z-index-modal);
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-height: calc(100vh - var(--spacing-8));
+  background-color: var(--color-bg-elevated);
+  border-radius: var(--radius-2xl);
+  box-shadow: var(--shadow-modal);
+  animation: modal-scale-in 200ms ease;
+  overflow: hidden;
+}
+
+@keyframes modal-scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* ============================================
+   SIZE VARIANTS
+   ============================================ */
+
+.modal--sm {
+  max-width: 400px;
+}
+
+.modal--md {
+  max-width: 500px;
+}
+
+.modal--lg {
+  max-width: 640px;
+}
+
+.modal--xl {
+  max-width: 800px;
+}
+
+.modal--full {
+  max-width: calc(100vw - var(--spacing-8));
+  max-height: calc(100vh - var(--spacing-8));
+}
+
+/* ============================================
+   HEADER
+   ============================================ */
+
+.modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-4);
+  padding: var(--spacing-4) var(--spacing-5);
+  border-bottom: var(--border-width-thin) solid var(--color-border-primary);
+  flex-shrink: 0;
+}
+
+.modal__title {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  margin: 0;
+  line-height: var(--line-height-tight);
+}
+
+.modal__close {
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+/* ============================================
+   DESCRIPTION
+   ============================================ */
+
+.modal__description {
+  padding: var(--spacing-3) var(--spacing-5) 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+/* ============================================
+   CONTENT
+   ============================================ */
+
+.modal__content {
+  flex: 1;
+  padding: var(--spacing-5);
+  overflow-y: auto;
+}
+
+/* ============================================
+   FOOTER
+   ============================================ */
+
+.modal__footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--spacing-3);
+  padding: var(--spacing-4) var(--spacing-5);
+  border-top: var(--border-width-thin) solid var(--color-border-primary);
+  flex-shrink: 0;
+}
+
+/* ============================================
+   SHEET VARIANT (Bottom slide-up)
+   ============================================ */
+
+.modal--sheet {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  max-width: 100%;
+  max-height: 90vh;
+  border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;
+  animation: modal-sheet-slide-up 300ms ease;
+}
+
+@keyframes modal-sheet-slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Sheet handle */
+.modal--sheet::before {
+  content: '';
+  position: absolute;
+  top: var(--spacing-2);
+  left: 50%;
+  transform: translateX(-50%);
+  width: 36px;
+  height: 4px;
+  background-color: var(--color-gray-300);
+  border-radius: var(--radius-full);
+}
+
+.modal--sheet .modal__header {
+  padding-top: var(--spacing-6);
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+
+@media (max-width: 640px) {
+  .modal-backdrop {
+    padding: var(--spacing-2);
+    align-items: flex-end;
+  }
+
+  .modal {
+    max-height: 90vh;
+    border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;
+    animation: modal-sheet-slide-up 300ms ease;
+  }
+
+  .modal::before {
+    content: '';
+    position: absolute;
+    top: var(--spacing-2);
+    left: 50%;
+    transform: translateX(-50%);
+    width: 36px;
+    height: 4px;
+    background-color: var(--color-gray-300);
+    border-radius: var(--radius-full);
+  }
+
+  .modal__header {
+    padding-top: var(--spacing-6);
+  }
+}
