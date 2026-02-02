@@ -1,1 +1,5 @@
-machine_learning/data/pdf
+# ========================
+# Machine Learning Data
+# ========================
+machine_learning/data
+machine_learning/artifacts
