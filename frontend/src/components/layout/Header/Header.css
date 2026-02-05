@@ -1,0 +1,135 @@
+/* ============================================
+   HEADER COMPONENT STYLES
+   ============================================ */
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-4);
+  height: var(--header-height);
+  padding: 0 var(--spacing-4);
+  background-color: var(--color-bg-primary);
+  border-bottom: var(--border-width-thin) solid var(--color-border-primary);
+  flex-shrink: 0;
+  z-index: var(--z-index-sticky);
+}
+
+/* ============================================
+   LEFT SECTION
+   ============================================ */
+
+.header__left {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  min-width: 0;
+  flex: 1;
+}
+
+.header__brand {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  flex-shrink: 0;
+}
+
+.header__logo {
+  color: var(--color-primary);
+}
+
+.header__app-name {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  letter-spacing: var(--letter-spacing-tight);
+}
+
+.header__workspace {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  min-width: 0;
+}
+
+.header__separator {
+  color: var(--color-text-tertiary);
+  font-size: var(--font-size-sm);
+}
+
+.header__workspace-name {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+  background: none;
+  border: none;
+  padding: var(--spacing-1) var(--spacing-2);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: var(--transition-all);
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.header__workspace-name:hover {
+  background-color: var(--color-bg-hover);
+  color: var(--color-text-primary);
+}
+
+.header__workspace-name:focus-visible {
+  outline: none;
+  box-shadow: var(--shadow-focus-ring);
+}
+
+/* ============================================
+   CENTER SECTION
+   ============================================ */
+
+.header__center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-2);
+}
+
+/* ============================================
+   RIGHT SECTION
+   ============================================ */
+
+.header__right {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--spacing-1);
+  flex: 1;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+
+@media (max-width: 768px) {
+  .header {
+    padding: 0 var(--spacing-2);
+  }
+
+  .header__app-name {
+    display: none;
+  }
+
+  .header__workspace-name {
+    max-width: 120px;
+  }
+
+  .header__center {
+    flex: 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .header__workspace {
+    display: none;
+  }
+}

@@ -1,0 +1,94 @@
+/* ============================================
+   TEXTAREA COMPONENT STYLES
+   ============================================ */
+
+.textarea-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+}
+
+.textarea-wrapper--full-width {
+  width: 100%;
+}
+
+/* ============================================
+   LABEL
+   ============================================ */
+
+.textarea-label {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+}
+
+/* ============================================
+   TEXTAREA FIELD
+   ============================================ */
+
+.textarea-field {
+  width: 100%;
+  min-height: 100px;
+  padding: var(--spacing-3);
+  background-color: var(--color-bg-secondary);
+  border: var(--border-width-thin) solid var(--color-border-primary);
+  border-radius: var(--radius-lg);
+  color: var(--color-text-primary);
+  font-family: var(--font-family-sans);
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-normal);
+  transition: var(--transition-all);
+}
+
+.textarea-field::placeholder {
+  color: var(--color-text-placeholder);
+}
+
+.textarea-field:hover:not(:disabled) {
+  border-color: var(--color-border-secondary);
+}
+
+.textarea-field:focus {
+  background-color: var(--color-bg-primary);
+  border-color: var(--color-border-focus);
+  box-shadow: var(--shadow-focus-ring);
+  outline: none;
+}
+
+.textarea-field:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background-color: var(--color-bg-tertiary);
+  resize: none;
+}
+
+/* ============================================
+   ERROR STATE
+   ============================================ */
+
+.textarea-wrapper--error .textarea-field {
+  border-color: var(--color-border-error);
+}
+
+.textarea-wrapper--error .textarea-field:focus {
+  border-color: var(--color-border-error);
+  box-shadow: var(--shadow-focus-ring-error);
+}
+
+/* ============================================
+   HELPER & ERROR TEXT
+   ============================================ */
+
+.textarea-helper,
+.textarea-error {
+  font-size: var(--font-size-xs);
+  margin-top: var(--spacing-1);
+}
+
+.textarea-helper {
+  color: var(--color-text-tertiary);
+}
+
+.textarea-error {
+  color: var(--color-error);
+}

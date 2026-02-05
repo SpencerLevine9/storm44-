@@ -1,0 +1,258 @@
+/* ============================================
+   BASE STYLES - Global resets and defaults
+   ============================================ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  font-family: var(--font-family-sans);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--line-height-normal);
+  color: var(--color-text-primary);
+  background-color: var(--color-bg-primary);
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ============================================
+   TYPOGRAPHY DEFAULTS
+   ============================================ */
+
+h1, h2, h3, h4, h5, h6 {
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-tight);
+  letter-spacing: var(--letter-spacing-tight);
+  color: var(--color-text-primary);
+}
+
+h1 {
+  font-size: var(--font-size-4xl);
+}
+
+h2 {
+  font-size: var(--font-size-3xl);
+}
+
+h3 {
+  font-size: var(--font-size-2xl);
+}
+
+h4 {
+  font-size: var(--font-size-xl);
+}
+
+h5 {
+  font-size: var(--font-size-lg);
+}
+
+h6 {
+  font-size: var(--font-size-base);
+}
+
+p {
+  margin-bottom: var(--spacing-4);
+}
+
+p:last-child {
+  margin-bottom: 0;
+}
+
+a {
+  color: var(--color-text-link);
+  text-decoration: none;
+  transition: var(--transition-colors);
+}
+
+a:hover {
+  color: var(--color-text-link-hover);
+  text-decoration: underline;
+}
+
+strong, b {
+  font-weight: var(--font-weight-semibold);
+}
+
+code, kbd, samp, pre {
+  font-family: var(--font-family-mono);
+  font-size: 0.9em;
+}
+
+code {
+  background-color: var(--color-bg-tertiary);
+  padding: 0.125em 0.375em;
+  border-radius: var(--radius-sm);
+}
+
+pre {
+  background-color: var(--color-bg-tertiary);
+  padding: var(--spacing-4);
+  border-radius: var(--radius-lg);
+  overflow-x: auto;
+}
+
+pre code {
+  background: none;
+  padding: 0;
+}
+
+/* ============================================
+   FORM ELEMENTS RESET
+   ============================================ */
+
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  background: none;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
+
+input,
+textarea,
+select {
+  background: transparent;
+  border: none;
+  outline: none;
+}
+
+textarea {
+  resize: vertical;
+}
+
+/* ============================================
+   LIST RESET
+   ============================================ */
+
+ul, ol {
+  list-style: none;
+}
+
+/* ============================================
+   IMAGE RESET
+   ============================================ */
+
+img, svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+/* ============================================
+   TABLE RESET
+   ============================================ */
+
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+/* ============================================
+   FOCUS STYLES
+   ============================================ */
+
+:focus-visible {
+  outline: none;
+  box-shadow: var(--shadow-focus-ring);
+}
+
+/* ============================================
+   SCROLLBAR STYLES
+   ============================================ */
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: var(--color-gray-300);
+  border-radius: var(--radius-full);
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--color-gray-400);
+}
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-gray-300) transparent;
+}
+
+/* ============================================
+   SELECTION STYLES
+   ============================================ */
+
+::selection {
+  background-color: var(--color-primary-light);
+  color: var(--color-text-primary);
+}
+
+/* ============================================
+   UTILITY CLASSES
+   ============================================ */
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+.truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}

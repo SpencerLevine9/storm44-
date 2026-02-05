@@ -1,0 +1,14 @@
+{
+  "youtube": [
+    {"title": "Video 1", "url": "https://www.youtube.com/watch?v=fWjsdhR3z3c"},
+    {"title": "Video 2", "url": "https://www.youtube.com/watch?v=SzJ46YA_RaA"}
+  ],
+  "pdf": [
+    {"title": "Intro CS (pages 9-36)", "file": "data/pdf/Intro_CS_ch1.pdf"},
+    {"title": "Intro CS (pages 39-87)", "file": "data/pdf/Intro_CS_ch2.pdf"},
+    {"title": "Intro CS (pages ALL)", "file": "data/pdf/Introduction_To_Computer_Science_-_WEB.pdf"},
+    {"title": "Intro Python (pages 7-35)", "file": "data/pdf/Intro_PythonProg_ch1.pdf"},
+    {"title": "Intro Python (pages 39-67)", "file": "data/pdf/Intro_PythonProg_ch2.pdf"},
+    {"title": "Intro Python (pages ALL)", "file": "data/pdf/Introduction_to_Python_Programming_-_WEB.pdf"}
+  ]
+}
