@@ -1,0 +1,53 @@
+/* ============================================
+   TOOLTIP COMPONENT STYLES
+   ============================================ */
+
+.tooltip {
+  position: fixed;
+  z-index: var(--z-index-tooltip);
+  padding: var(--spacing-2) var(--spacing-3);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-inverse);
+  background-color: var(--color-gray-800);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  white-space: nowrap;
+  pointer-events: none;
+  animation: tooltip-fade-in 150ms ease;
+  max-width: 280px;
+  word-wrap: break-word;
+}
+
+[data-theme="dark"] .tooltip {
+  background-color: var(--color-gray-200);
+  color: var(--color-gray-900);
+}
+
+@keyframes tooltip-fade-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Position-specific animations */
+.tooltip--top {
+  transform-origin: bottom center;
+}
+
+.tooltip--bottom {
+  transform-origin: top center;
+}
+
+.tooltip--left {
+  transform-origin: right center;
+}
+
+.tooltip--right {
+  transform-origin: left center;
+}

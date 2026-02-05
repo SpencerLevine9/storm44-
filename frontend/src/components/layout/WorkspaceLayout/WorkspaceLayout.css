@@ -1,0 +1,237 @@
+/* ============================================
+   WORKSPACE LAYOUT STYLES
+   ============================================ */
+
+.workspace-layout {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+  background-color: var(--color-bg-primary);
+}
+
+.workspace-layout__body {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+}
+
+/* ============================================
+   PANELS
+   ============================================ */
+
+.workspace-panel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  transition: width 200ms ease;
+}
+
+.workspace-panel__content {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Left Panel */
+.workspace-panel--left {
+  background-color: var(--color-bg-secondary);
+  border-right: var(--border-width-thin) solid var(--color-border-primary);
+  flex-shrink: 0;
+}
+
+.workspace-panel--left.workspace-panel--collapsed {
+  width: 0 !important;
+  border-right: none;
+}
+
+.workspace-panel--left.workspace-panel--collapsed .workspace-panel__content {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Center Panel */
+.workspace-panel--center {
+  flex: 1;
+  min-width: 0;
+  position: relative;
+  background-color: var(--color-bg-primary);
+}
+
+/* Right Panel */
+.workspace-panel--right {
+  background-color: var(--color-bg-secondary);
+  border-left: var(--border-width-thin) solid var(--color-border-primary);
+  flex-shrink: 0;
+}
+
+.workspace-panel--right.workspace-panel--collapsed {
+  width: 0 !important;
+  border-left: none;
+}
+
+.workspace-panel--right.workspace-panel--collapsed .workspace-panel__content {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* ============================================
+   PANEL TOGGLE BUTTONS
+   ============================================ */
+
+.workspace-panel__toggle {
+  position: absolute;
+  top: var(--spacing-2);
+  z-index: 10;
+}
+
+.workspace-panel__toggle--left {
+  left: var(--spacing-2);
+}
+
+.workspace-panel__toggle--right {
+  right: var(--spacing-2);
+}
+
+/* ============================================
+   RESIZE HANDLES
+   ============================================ */
+
+.resize-handle {
+  position: relative;
+  width: 4px;
+  cursor: col-resize;
+  background-color: transparent;
+  transition: background-color 150ms ease;
+  flex-shrink: 0;
+  z-index: 5;
+}
+
+.resize-handle::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 8px;
+  left: -2px;
+}
+
+.resize-handle:hover,
+.resize-handle:active {
+  background-color: var(--color-primary);
+}
+
+.resize-handle--left {
+  margin-left: -2px;
+}
+
+.resize-handle--right {
+  margin-right: -2px;
+}
+
+/* ============================================
+   MOBILE DRAWER
+   ============================================ */
+
+.mobile-drawer-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-index-modal-backdrop);
+  background-color: var(--color-bg-overlay);
+  backdrop-filter: var(--backdrop-blur-sm);
+  animation: fade-in 200ms ease;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.mobile-drawer {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  z-index: var(--z-index-modal);
+  width: 85%;
+  max-width: 360px;
+  background-color: var(--color-bg-secondary);
+  box-shadow: var(--shadow-2xl);
+  transform: translateX(-100%);
+  transition: transform 300ms ease;
+}
+
+.mobile-drawer--left {
+  left: 0;
+}
+
+.mobile-drawer--right {
+  right: 0;
+  transform: translateX(100%);
+}
+
+.mobile-drawer--open {
+  transform: translateX(0);
+}
+
+.mobile-drawer__content {
+  height: 100%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ============================================
+   RESPONSIVE ADJUSTMENTS
+   ============================================ */
+
+@media (max-width: 768px) {
+  .workspace-panel__toggle {
+    display: none;
+  }
+}
+
+/* ============================================
+   UTILITY: Panel header pattern
+   ============================================ */
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-3);
+  padding: var(--spacing-3) var(--spacing-4);
+  border-bottom: var(--border-width-thin) solid var(--color-border-primary);
+  flex-shrink: 0;
+}
+
+.panel-header__title {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.panel-header__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-1);
+}
+
+.panel-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--spacing-3);
+}
+
+/* ============================================
+   SCROLLABLE CONTENT
+   ============================================ */
+
+.panel-scrollable {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+}

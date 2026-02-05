@@ -1,0 +1,170 @@
+/* ============================================
+   DROPDOWN COMPONENT STYLES
+   ============================================ */
+
+.dropdown {
+  position: relative;
+  display: inline-flex;
+}
+
+/* ============================================
+   TRIGGER
+   ============================================ */
+
+.dropdown-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  cursor: pointer;
+}
+
+/* ============================================
+   MENU
+   ============================================ */
+
+.dropdown-menu {
+  position: fixed;
+  z-index: var(--z-index-dropdown);
+  min-width: 180px;
+  padding: var(--spacing-1);
+  background-color: var(--color-bg-elevated);
+  border: var(--border-width-thin) solid var(--color-border-primary);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-floating);
+  animation: dropdown-fade-in 150ms ease;
+}
+
+@keyframes dropdown-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ============================================
+   MENU ITEM
+   ============================================ */
+
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  width: 100%;
+  padding: var(--spacing-2) var(--spacing-3);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-regular);
+  color: var(--color-text-primary);
+  background: none;
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: var(--transition-colors);
+  text-align: left;
+}
+
+.dropdown-item:hover:not(:disabled) {
+  background-color: var(--color-bg-hover);
+}
+
+.dropdown-item:focus-visible {
+  outline: none;
+  background-color: var(--color-bg-hover);
+}
+
+.dropdown-item:active:not(:disabled) {
+  background-color: var(--color-bg-active);
+}
+
+/* Disabled state */
+.dropdown-item--disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Destructive variant */
+.dropdown-item--destructive {
+  color: var(--color-error);
+}
+
+.dropdown-item--destructive:hover:not(:disabled) {
+  background-color: var(--color-error-light);
+}
+
+/* ============================================
+   ITEM PARTS
+   ============================================ */
+
+.dropdown-item__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  color: var(--color-text-secondary);
+  flex-shrink: 0;
+}
+
+.dropdown-item__icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+.dropdown-item--destructive .dropdown-item__icon {
+  color: var(--color-error);
+}
+
+.dropdown-item__label {
+  flex: 1;
+}
+
+.dropdown-item__shortcut {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-tertiary);
+  margin-left: auto;
+  padding-left: var(--spacing-4);
+}
+
+/* ============================================
+   CHECKBOX ITEM
+   ============================================ */
+
+.dropdown-item--checkbox {
+  padding-left: var(--spacing-2);
+}
+
+.dropdown-item__check {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  color: var(--color-primary);
+  flex-shrink: 0;
+}
+
+/* ============================================
+   SEPARATOR
+   ============================================ */
+
+.dropdown-separator {
+  height: 1px;
+  margin: var(--spacing-1) 0;
+  background-color: var(--color-border-primary);
+}
+
+/* ============================================
+   LABEL
+   ============================================ */
+
+.dropdown-label {
+  padding: var(--spacing-2) var(--spacing-3);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wide);
+}
