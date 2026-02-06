@@ -1,0 +1,24 @@
+.add-source-modal {
+  /* Ensure minimum height */
+  min-height: 400px;
+}
+
+.add-source-modal .modal__content {
+  display: flex;
+  flex-direction: column;
+  min-height: 300px;
+}
+
+.add-source-tab {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+  flex: 1;
+}
+
+.modal__footer-actions {
+  margin-top: auto;
+  display: flex;
+  justify-content: flex-end;
+  padding-top: var(--spacing-4);
+}

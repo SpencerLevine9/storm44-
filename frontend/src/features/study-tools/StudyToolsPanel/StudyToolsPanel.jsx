@@ -1,7 +1,9 @@
 import { useState } from 'react';
-import { BookOpen, HelpCircle, Gamepad2, Plus, Sparkles } from 'lucide-react';
+import { BookOpen, HelpCircle, Gamepad2, Plus, Sparkles, Maximize2, Minimize2 } from 'lucide-react';
 import { Tabs, TabList, Tab, TabPanel } from '../../../components/ui/Tabs';
 import Button from '../../../components/ui/Button';
+import IconButton from '../../../components/ui/IconButton';
+import { useLayout } from '../../../components/layout/WorkspaceLayout/LayoutContext';
 import './StudyToolsPanel.css';
 
 // Storage key for persisting last selected tab
@@ -11,6 +13,14 @@ const TAB_STORAGE_KEY = 'study-tools-tab';
  * Study Tools panel - right sidebar with tabs for Flashcards, Quizzes, Mini-game
  */
 function StudyToolsPanel() {
+  const {
+    studyToolsFullscreen,
+    enterFullscreen,
+    exitFullscreen,
+    setRightPanelWidthPreset,
+    isMobile
+  } = useLayout();
+
   const [activeTab, setActiveTab] = useState(() => {
     try {
       return localStorage.getItem(TAB_STORAGE_KEY) || 'flashcards';
@@ -33,6 +43,26 @@ function StudyToolsPanel() {
       {/* Header */}
       <div className="panel-header">
         <h2 className="panel-header__title">Study Tools</h2>
+        <div className="panel-header__actions">
+          {!isMobile && !studyToolsFullscreen && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setRightPanelWidthPreset(0.67)}
+              title="Resize to 2/3 width"
+            >
+              2/3 Study
+            </Button>
+          )}
+          <IconButton
+            variant="ghost"
+            size="sm"
+            label={studyToolsFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
+            onClick={studyToolsFullscreen ? exitFullscreen : enterFullscreen}
+          >
+            {studyToolsFullscreen ? <Minimize2 size={18} /> : <Maximize2 size={18} />}
+          </IconButton>
+        </div>
       </div>
 
       {/* Tabs */}

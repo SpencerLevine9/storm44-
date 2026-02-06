@@ -37,7 +37,7 @@ function persistState(state) {
 /**
  * Main 3-panel workspace layout
  */
-function WorkspaceLayout({ 
+function WorkspaceLayout({
   children,
   leftPanel,
   rightPanel,
@@ -48,11 +48,11 @@ function WorkspaceLayout({
   defaultRightWidth = 320,
   minLeftWidth = 200,
   maxLeftWidth = 400,
-  minRightWidth = 280,
-  maxRightWidth = 480,
+  minRightWidth = 420, // Updated per AR-02
+  maxRightWidth = 800, // Increased max width
 }) {
   const savedState = loadPersistedState();
-  
+
   const [leftCollapsed, setLeftCollapsed] = useState(
     savedState?.leftCollapsed ?? defaultLeftCollapsed
   );
@@ -69,6 +69,10 @@ function WorkspaceLayout({
     typeof window !== 'undefined' && window.innerWidth <= MOBILE_BREAKPOINT
   );
   const [mobileDrawer, setMobileDrawer] = useState(null); // 'left' | 'right' | null
+
+  // AR-01: Fullscreen State
+  const [studyToolsFullscreen, setStudyToolsFullscreen] = useState(false);
+  const [preFullscreenSnapshot, setPreFullscreenSnapshot] = useState(null);
 
   const layoutRef = useRef(null);
   const isResizing = useRef(null);
@@ -87,10 +91,12 @@ function WorkspaceLayout({
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Persist state changes
+  // Persist state changes (only normal layout)
   useEffect(() => {
-    persistState({ leftCollapsed, rightCollapsed, leftWidth, rightWidth });
-  }, [leftCollapsed, rightCollapsed, leftWidth, rightWidth]);
+    if (!studyToolsFullscreen) {
+      persistState({ leftCollapsed, rightCollapsed, leftWidth, rightWidth });
+    }
+  }, [leftCollapsed, rightCollapsed, leftWidth, rightWidth, studyToolsFullscreen]);
 
   // Toggle functions
   const toggleLeftPanel = useCallback(() => {
@@ -113,6 +119,62 @@ function WorkspaceLayout({
     setMobileDrawer(null);
   }, []);
 
+  // AR-01: Fullscreen Logic
+  const enterFullscreen = useCallback(() => {
+    setPreFullscreenSnapshot({
+      leftCollapsed,
+      rightCollapsed,
+      leftWidth,
+      rightWidth
+    });
+    setStudyToolsFullscreen(true);
+    // In Fullscreen, we basically strictly show Right Panel.
+    // We don't necessarily need to mutate collapsed state if we just don't render them.
+    // But setting rightCollapsed to false is important to ensure it's visible.
+    setRightCollapsed(false);
+  }, [leftCollapsed, rightCollapsed, leftWidth, rightWidth]);
+
+  const exitFullscreen = useCallback(() => {
+    setStudyToolsFullscreen(false);
+    if (preFullscreenSnapshot) {
+      setLeftCollapsed(preFullscreenSnapshot.leftCollapsed);
+      setRightCollapsed(preFullscreenSnapshot.rightCollapsed);
+      setLeftWidth(preFullscreenSnapshot.leftWidth);
+      setRightWidth(preFullscreenSnapshot.rightWidth);
+      setPreFullscreenSnapshot(null);
+    }
+  }, [preFullscreenSnapshot]);
+
+  // AR-02: Preset Logic
+  const setRightPanelWidthPreset = useCallback((ratio) => {
+    if (typeof window === 'undefined') return;
+    const totalWidth = window.innerWidth;
+    const targetWidth = Math.floor(totalWidth * ratio);
+
+    // Ensure min constraints
+    // Chat min width = 320px. 
+    // Chat width ~= Total - Left (if open) - Right.
+    // But requirement says "Chat width is remaining center area".
+    // If Left is open, Chat = Total - Left - Right.
+    // We should probably preserve left panel state?
+    // "Set Chat width to 33% viewport... Set Study Tools width to 67%".
+    // This implies Left Panel might need to be collapsed to honor strict 33/67 ratio of VIEWPORT.
+    // Making an executive decision: If 2/3 preset is clicked, we ensure Study is 2/3.
+    // We try to keep Left Panel as is, but if Chat becomes < 320, we might need to squeeze or auto-collapse left?
+    // For simplicity: Set right width, obey min/max.
+
+    // Check constraint: Min Chat Width = 320.
+    // We need to know current Left width usage.
+    const currentLeftWidth = (leftCollapsed || isMobile) ? 0 : leftWidth;
+    const maxAllowedRightWidth = totalWidth - currentLeftWidth - 320; // Reserve 320 for Chat
+
+    const finalWidth = Math.min(targetWidth, maxAllowedRightWidth);
+
+    setRightWidth(Math.max(minRightWidth, finalWidth));
+    setRightCollapsed(false); // Ensure open
+  }, [leftCollapsed, isMobile, leftWidth, minRightWidth]);
+
+
   // Resize handling
   const handleResizeStart = useCallback((side) => (e) => {
     e.preventDefault();
@@ -125,15 +187,24 @@ function WorkspaceLayout({
     if (!isResizing.current || !layoutRef.current) return;
 
     const layoutRect = layoutRef.current.getBoundingClientRect();
-    
+
     if (isResizing.current === 'left') {
       const newWidth = e.clientX - layoutRect.left;
       setLeftWidth(Math.max(minLeftWidth, Math.min(maxLeftWidth, newWidth)));
     } else if (isResizing.current === 'right') {
       const newWidth = layoutRect.right - e.clientX;
-      setRightWidth(Math.max(minRightWidth, Math.min(maxRightWidth, newWidth)));
+
+      // AR-02: Min Chat Width = 320px
+      const currentLeftWidth = (leftCollapsed || isMobile) ? 0 : leftWidth;
+      const maxAllowedWidth = layoutRect.width - currentLeftWidth - 320;
+
+      const constrainedWidth = Math.min(newWidth, maxAllowedWidth);
+
+      // Also respect maxRightWidth if provided, though 2/3 preset might exceed old defaults
+      // We use the new maxRightWidth prop or a robust large number
+      setRightWidth(Math.max(minRightWidth, Math.min(maxRightWidth * 1.5, constrainedWidth)));
     }
-  }, [minLeftWidth, maxLeftWidth, minRightWidth, maxRightWidth]);
+  }, [minLeftWidth, maxLeftWidth, minRightWidth, maxRightWidth, leftCollapsed, isMobile, leftWidth]);
 
   const handleResizeEnd = useCallback(() => {
     isResizing.current = null;
@@ -163,15 +234,19 @@ function WorkspaceLayout({
         e.preventDefault();
         toggleRightPanel();
       }
-      // Escape: Close mobile drawer
-      if (e.key === 'Escape' && mobileDrawer) {
-        closeMobileDrawer();
+      // Escape: Close mobile drawer OR Exit Fullscreen
+      if (e.key === 'Escape') {
+        if (studyToolsFullscreen) {
+          exitFullscreen();
+        } else if (mobileDrawer) {
+          closeMobileDrawer();
+        }
       }
     };
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [toggleLeftPanel, toggleRightPanel, mobileDrawer, closeMobileDrawer]);
+  }, [toggleLeftPanel, toggleRightPanel, mobileDrawer, closeMobileDrawer, studyToolsFullscreen, exitFullscreen]);
 
   const contextValue = {
     leftCollapsed,
@@ -180,23 +255,27 @@ function WorkspaceLayout({
     rightWidth,
     isMobile,
     mobileDrawer,
+    studyToolsFullscreen,
     toggleLeftPanel,
     toggleRightPanel,
     closeMobileDrawer,
     setLeftWidth,
     setRightWidth,
+    enterFullscreen,
+    exitFullscreen,
+    setRightPanelWidthPreset,
   };
 
   return (
     <LayoutContext.Provider value={contextValue}>
       <div className="workspace-layout" ref={layoutRef}>
-        {header}
-        
+        {!studyToolsFullscreen && header}
+
         <div className="workspace-layout__body">
           {/* Left Panel */}
-          {!isMobile && (
+          {!isMobile && !studyToolsFullscreen && (
             <>
-              <aside 
+              <aside
                 className={`workspace-panel workspace-panel--left ${leftCollapsed ? 'workspace-panel--collapsed' : ''}`}
                 style={{ width: leftCollapsed ? 0 : leftWidth }}
                 aria-label="Sources panel"
@@ -205,10 +284,10 @@ function WorkspaceLayout({
                   {leftPanel}
                 </div>
               </aside>
-              
+
               {/* Left Resize Handle */}
               {!leftCollapsed && (
-                <div 
+                <div
                   className="resize-handle resize-handle--left"
                   onMouseDown={handleResizeStart('left')}
                   aria-hidden="true"
@@ -218,58 +297,65 @@ function WorkspaceLayout({
           )}
 
           {/* Center Panel */}
-          <main className="workspace-panel workspace-panel--center">
-            {/* Panel toggle buttons for desktop */}
-            {!isMobile && (
-              <div className="workspace-panel__toggle workspace-panel__toggle--left">
-                <Tooltip content={leftCollapsed ? 'Open sources (⌘B)' : 'Close sources (⌘B)'} position="right">
-                  <IconButton
-                    variant="ghost"
-                    size="sm"
-                    label={leftCollapsed ? 'Open sources panel' : 'Close sources panel'}
-                    onClick={toggleLeftPanel}
-                  >
-                    {leftCollapsed ? <PanelLeftOpen size={18} /> : <PanelLeftClose size={18} />}
-                  </IconButton>
-                </Tooltip>
+          {!studyToolsFullscreen ? (
+            <main className="workspace-panel workspace-panel--center">
+              {/* Panel toggle buttons for desktop */}
+              {!isMobile && (
+                <div className="workspace-panel__toggle workspace-panel__toggle--left">
+                  <Tooltip content={leftCollapsed ? 'Open sources (⌘B)' : 'Close sources (⌘B)'} position="right">
+                    <IconButton
+                      variant="ghost"
+                      size="sm"
+                      label={leftCollapsed ? 'Open sources panel' : 'Close sources panel'}
+                      onClick={toggleLeftPanel}
+                    >
+                      {leftCollapsed ? <PanelLeftOpen size={18} /> : <PanelLeftClose size={18} />}
+                    </IconButton>
+                  </Tooltip>
+                </div>
+              )}
+
+              <div className="workspace-panel__content">
+                {children}
               </div>
-            )}
-            
-            <div className="workspace-panel__content">
-              {children}
-            </div>
-            
-            {!isMobile && (
-              <div className="workspace-panel__toggle workspace-panel__toggle--right">
-                <Tooltip content={rightCollapsed ? 'Open study tools (⌘⇧B)' : 'Close study tools (⌘⇧B)'} position="left">
-                  <IconButton
-                    variant="ghost"
-                    size="sm"
-                    label={rightCollapsed ? 'Open study tools panel' : 'Close study tools panel'}
-                    onClick={toggleRightPanel}
-                  >
-                    {rightCollapsed ? <PanelRightOpen size={18} /> : <PanelRightClose size={18} />}
-                  </IconButton>
-                </Tooltip>
-              </div>
-            )}
-          </main>
+
+              {!isMobile && (
+                <div className="workspace-panel__toggle workspace-panel__toggle--right">
+                  <Tooltip content={rightCollapsed ? 'Open study tools (⌘⇧B)' : 'Close study tools (⌘⇧B)'} position="left">
+                    <IconButton
+                      variant="ghost"
+                      size="sm"
+                      label={rightCollapsed ? 'Open study tools panel' : 'Close study tools panel'}
+                      onClick={toggleRightPanel}
+                    >
+                      {rightCollapsed ? <PanelRightOpen size={18} /> : <PanelRightClose size={18} />}
+                    </IconButton>
+                  </Tooltip>
+                </div>
+              )}
+            </main>
+          ) : null}
 
           {/* Right Panel */}
           {!isMobile && (
             <>
-              {/* Right Resize Handle */}
-              {!rightCollapsed && (
-                <div 
+              {/* Right Resize Handle - Hide in Fullscreen */}
+              {!rightCollapsed && !studyToolsFullscreen && (
+                <div
                   className="resize-handle resize-handle--right"
                   onMouseDown={handleResizeStart('right')}
                   aria-hidden="true"
                 />
               )}
-              
-              <aside 
+
+              <aside
                 className={`workspace-panel workspace-panel--right ${rightCollapsed ? 'workspace-panel--collapsed' : ''}`}
-                style={{ width: rightCollapsed ? 0 : rightWidth }}
+                style={{
+                  width: studyToolsFullscreen
+                    ? '100%'
+                    : (rightCollapsed ? 0 : rightWidth),
+                  flex: studyToolsFullscreen ? 1 : undefined
+                }}
                 aria-label="Study tools panel"
               >
                 <div className="workspace-panel__content">
@@ -280,9 +366,10 @@ function WorkspaceLayout({
           )}
         </div>
 
+        {/* ... Mobile drawers ... (Keep existing) */}
         {/* Mobile Drawer Backdrop */}
         {isMobile && mobileDrawer && (
-          <div 
+          <div
             className="mobile-drawer-backdrop"
             onClick={closeMobileDrawer}
             aria-hidden="true"
@@ -291,7 +378,7 @@ function WorkspaceLayout({
 
         {/* Mobile Left Drawer */}
         {isMobile && (
-          <aside 
+          <aside
             className={`mobile-drawer mobile-drawer--left ${mobileDrawer === 'left' ? 'mobile-drawer--open' : ''}`}
             aria-label="Sources panel"
             aria-hidden={mobileDrawer !== 'left'}
@@ -302,9 +389,9 @@ function WorkspaceLayout({
           </aside>
         )}
 
-        {/* Mobile Right Drawer */}
+        {/* Mobile Right Drawer - Update for fullscreen-like behavior on mobile if needed, or keep standard */}
         {isMobile && (
-          <aside 
+          <aside
             className={`mobile-drawer mobile-drawer--right ${mobileDrawer === 'right' ? 'mobile-drawer--open' : ''}`}
             aria-label="Study tools panel"
             aria-hidden={mobileDrawer !== 'right'}
