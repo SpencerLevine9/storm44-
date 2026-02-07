@@ -1,0 +1,95 @@
+{
+  "meta": {
+    "project": "Storm44 AI Study Workspace",
+    "date": "2026-02-06",
+    "prepared_by": "Software Development Manager"
+  },
+  "product_overview": "Storm44 is a free, AI-powered study workspace that transforms user-provided materials like YouTube links, PDFs, and notes into organized notes, flashcards, quizzes, and a mini learning game, complemented by an AI Tutor chat with traceable citations connecting back to the original sources.",
+  "core_goals": [
+    "Convert user materials into an interactive 3-panel workspace with Sources, Chat, and Study Tools.",
+    "Deliver chat responses with clickable citations that enable users to verify claims by opening relevant source excerpts.",
+    "Generate study aids including flashcards, MCQ quizzes, and a mini-game from selected sources.",
+    "Maintain UI responsiveness and smooth performance even with long chat histories and many sources through virtualization and lazy loading."
+  ],
+  "key_features": [
+    "3-panel workspace layout with a left Sources panel, central Chat panel, and right Study Tools panel (flashcards, quizzes, mini-game) that are resizable on desktop and adaptive on mobile/tablet.",
+    "Sources panel supporting PDF, TXT, URL, and notes with listing, search, multi-select for chat scope, preview, rename, and delete capabilities.",
+    "Chat panel with message thread, streaming AI assistant responses, and citations rendered as clickable links opening corresponding source excerpts with highlights.",
+    "Study Tools panel containing tabs for Flashcards, Quizzes, and a Mini-game; flashcards support generation, editing, study mode with grading, and session summaries; quizzes provide MCQ generation with configurable questions and difficulty plus results with explanations and citations; mini-game offers term-definition matching with scoring and replay.",
+    "Add Source modal replacing the traditional menu with tabs to upload files, add URLs, or create manual notes, including validation and interactive feedback.",
+    "Adaptive UI behaviors including collapsible panels and drawers on smaller screens, drag handle resizing with persistence, and fullscreen toggle for Study Tools panel.",
+    "Accessibility features with keyboard operability, focus management, ARIA roles, and modal focus trapping.",
+    "Performance optimizations through virtualization, lazy loading, and efficient state management for smooth experience.",
+    "Error monitoring, analytics tracking key events like source addition, chat message sending, and study tool usage."
+  ],
+  "user_flow_summary": [
+    "User adds sources via the Add Source modal by uploading files, entering URLs, or creating notes; sources appear in the Sources panel list.",
+    "User selects multiple sources to define an active scope that filters the content accessible to the AI chat assistant.",
+    "User interacts with the chat panel to ask questions and receive streaming responses from the AI Tutor, with citations linking back to source excerpts which open on click.",
+    "User navigates to the Study Tools panel and switches between tabs to generate and study flashcards, take quizzes, or play the mini-game, all based on the selected sources.",
+    "Users resize panels on desktop or use drawer toggles on mobile to adapt the workspace layout to their preferences, with settings persisting across sessions.",
+    "Users can enter Study Tools fullscreen mode which overlays the study tools over other panels and can exit back to the previous layout preserving states."
+  ],
+  "validation_criteria": [
+    "Chat responses include clickable citations that open the correct source and highlight the relevant excerpt with best effort.",
+    "Sources list supports large numbers of entries with search, virtualization, multi-selection, and preview without UI freezes.",
+    "Study Tools can generate flashcards and MCQ quizzes from selected sources, allow edits, support study modes, and show session results accurately.",
+    "Mini-game runs smoothly with proper scoring, replay, and integration of selected sources as content.",
+    "UI resizing persists correctly across sessions and adapts responsively on mobile devices with drawer behavior.",
+    "Add Source modal properly validates inputs, handles uploads, URL addition, note creation, and displays progress and errors as specified.",
+    "Accessibility standards met via keyboard navigation, focus traps in modals, ARIA roles, and ESC key handling for dismissing dialogs.",
+    "Performance targets met including time to first answer under 2 minutes and smooth experience with hundreds of chat messages and sources.",
+    "Analytics events for key interactions such as source_added, chat_sent, flashcards_generated, quiz_completed, and game_completed are correctly captured and reported.",
+    "Security measures validate and sanitize inputs and rendered source content to prevent vulnerabilities."
+  ],
+  "code_summary": {
+    "tech_stack": [
+      "React",
+      "Vite",
+      "Lucide-React",
+      "react-router-dom"
+    ],
+    "features": [
+      {
+        "name": "Chat Feature",
+        "description": "Chat functionality for the application",
+        "files": [
+          "src/features/chat/ChatPanel/index.js",
+          "src/features/chat/ChatPanel/ChatPanel.jsx"
+        ]
+      },
+      {
+        "name": "Sources Feature",
+        "description": "Components for managing sources including add source modal",
+        "files": [
+          "src/features/sources/AddSourceModal/AddSourceModal.jsx",
+          "src/features/sources/SourcesPanel/SourcesPanel.jsx"
+        ]
+      },
+      {
+        "name": "Study Tools Feature",
+        "description": "Tools for studying related functionalities",
+        "files": [
+          "src/features/study-tools/StudyToolsPanel/StudyToolsPanel.jsx"
+        ]
+      },
+      {
+        "name": "Layout Components",
+        "description": "Basic structure components such as Header and Workspace Layout",
+        "files": [
+          "src/components/layout/Header/Header.jsx",
+          "src/components/layout/WorkspaceLayout/WorkspaceLayout.jsx",
+          "src/components/layout/index.js"
+        ]
+      },
+      {
+        "name": "Workspace Page",
+        "description": "Main page for the workspace",
+        "files": [
+          "src/pages/WorkspacePage/WorkspacePage.jsx",
+          "src/pages/WorkspacePage/index.js"
+        ]
+      }
+    ]
+  }
+}

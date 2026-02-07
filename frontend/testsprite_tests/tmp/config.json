@@ -1,7 +1,19 @@
 {
-  "status": "init",
-  "scope": "codebase",
+  "status": "commited",
   "type": "frontend",
-  "localEndpoint": "http://localhost:5173/",
-  "serverPort": 53700
+  "scope": "codebase",
+  "localEndpoint": "http://localhost:5173",
+  "loginUser": "ethan1019783",
+  "loginPassword": "Ishtar17!",
+  "executionArgs": {
+    "projectName": "frontend",
+    "projectPath": "/Users/ethangonzalez/Desktop/storm44-/frontend",
+    "testIds": [],
+    "additionalInstruction": "",
+    "envs": {
+      "API_KEY": "sk-user-GYJyZsgF5yphfLGwkcXK-slTnGfjJ-SWYsGXvVyenBJ0rL2qhwSVBRAXcgsZEhoDvvi_-0LPuR-OC9TEyJRcYAnubKJUbcElzVSnEGbqj3XnfRYfZ4OIOUiCgU_IhOKdkLA"
+    }
+  },
+  "serverPort": 53911,
+  "proxy": "http://2d9f989d-33dc-47c8-8df3-07699c49d0d9:fm4TwHlSP9jpFkFRCb77TK5M8mT8eP4d@tun.testsprite.com:8080"
 }

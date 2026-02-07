@@ -1,0 +1,644 @@
+[
+  {
+    "id": "TC001",
+    "title": "Add Source - Upload PDF File Successfully",
+    "description": "Verify that users can upload a PDF file via the Add Source modal and it appears correctly in the Sources panel.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Open the Add Source modal"
+      },
+      {
+        "type": "action",
+        "description": "Select the Upload Files tab"
+      },
+      {
+        "type": "action",
+        "description": "Upload a valid PDF file"
+      },
+      {
+        "type": "assertion",
+        "description": "Check that the uploaded PDF appears in the Sources panel list"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify that the source can be previewed correctly"
+      }
+    ]
+  },
+  {
+    "id": "TC002",
+    "title": "Add Source - Enter Valid URL",
+    "description": "Verify that users can add a source by entering a valid URL and that it appears in the Sources panel.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Open the Add Source modal"
+      },
+      {
+        "type": "action",
+        "description": "Switch to the Add URL tab"
+      },
+      {
+        "type": "action",
+        "description": "Input a valid URL"
+      },
+      {
+        "type": "action",
+        "description": "Submit the URL"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the new source is listed in the Sources panel"
+      },
+      {
+        "type": "assertion",
+        "description": "Preview the URL content from Sources panel"
+      }
+    ]
+  },
+  {
+    "id": "TC003",
+    "title": "Add Source - Create Manual Note",
+    "description": "Verify manual note creation via Add Source modal with validation and display in Sources panel.",
+    "category": "functional",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Open Add Source modal"
+      },
+      {
+        "type": "action",
+        "description": "Switch to Create Note tab"
+      },
+      {
+        "type": "action",
+        "description": "Enter valid note content and title"
+      },
+      {
+        "type": "action",
+        "description": "Submit the note"
+      },
+      {
+        "type": "assertion",
+        "description": "Note appears in Sources panel"
+      },
+      {
+        "type": "assertion",
+        "description": "Note content is previewable"
+      }
+    ]
+  },
+  {
+    "id": "TC004",
+    "title": "Add Source - Input Validation and Error Handling",
+    "description": "Verify that invalid inputs in Add Source modal trigger correct validation messages and prevent submission.",
+    "category": "error handling",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Open Add Source modal"
+      },
+      {
+        "type": "action",
+        "description": "Try to upload unsupported file type"
+      },
+      {
+        "type": "assertion",
+        "description": "Validation error is displayed"
+      },
+      {
+        "type": "action",
+        "description": "Try to enter invalid URL format"
+      },
+      {
+        "type": "assertion",
+        "description": "Validation error is displayed"
+      },
+      {
+        "type": "action",
+        "description": "Try to submit empty manual note"
+      },
+      {
+        "type": "assertion",
+        "description": "Validation error is displayed and submission is blocked"
+      }
+    ]
+  },
+  {
+    "id": "TC005",
+    "title": "Sources Panel - Search Functionality",
+    "description": "Verify that searching sources in the Sources panel filters the list accordingly with responsiveness.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Populate Sources panel with a large list of sources"
+      },
+      {
+        "type": "action",
+        "description": "Enter search query in Sources panel search bar"
+      },
+      {
+        "type": "assertion",
+        "description": "Sources list updates to show matching entries only"
+      },
+      {
+        "type": "assertion",
+        "description": "No UI freezes or lag during search"
+      }
+    ]
+  },
+  {
+    "id": "TC006",
+    "title": "Sources Panel - Multi-Select and Scope Setting for Chat",
+    "description": "Verify selecting multiple sources filters the content scope accessible to the AI chat assistant accordingly.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Select multiple sources in Sources panel"
+      },
+      {
+        "type": "assertion",
+        "description": "Selected sources are indicated as active scope"
+      },
+      {
+        "type": "action",
+        "description": "Send question in Chat panel"
+      },
+      {
+        "type": "assertion",
+        "description": "AI chat responses reflect only selected sources contents"
+      }
+    ]
+  },
+  {
+    "id": "TC007",
+    "title": "Sources Panel - Rename and Delete Source",
+    "description": "Verify renaming sources updates their names persistently, and deleting sources removes them properly.",
+    "category": "functional",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Rename an existing source in Sources panel"
+      },
+      {
+        "type": "assertion",
+        "description": "New name is reflected immediately and persists on refresh"
+      },
+      {
+        "type": "action",
+        "description": "Delete a source from Sources panel"
+      },
+      {
+        "type": "assertion",
+        "description": "Source is removed from list and no longer accessible"
+      }
+    ]
+  },
+  {
+    "id": "TC008",
+    "title": "Chat Panel - Streaming AI Responses with Clickable Citations",
+    "description": "Verify chat panel displays AI Tutor responses streaming progressively including clickable citations that open correct source excerpts with highlighting.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Enter a question in Chat panel"
+      },
+      {
+        "type": "assertion",
+        "description": "AI response streams progressively in chat thread"
+      },
+      {
+        "type": "assertion",
+        "description": "Citations appear as clickable links within response"
+      },
+      {
+        "type": "action",
+        "description": "Click a citation link"
+      },
+      {
+        "type": "assertion",
+        "description": "Corresponding source excerpt opens with correct highlight"
+      }
+    ]
+  },
+  {
+    "id": "TC009",
+    "title": "Chat Panel - Long Chat History Performance and Virtualization",
+    "description": "Verify chat panel performs smoothly with hundreds of messages using virtualization and lazy loading.",
+    "category": "performance",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Load chat history with over 200 messages"
+      },
+      {
+        "type": "assertion",
+        "description": "Chat panel scrolls and responds without lag"
+      },
+      {
+        "type": "action",
+        "description": "Send new message to AI chat"
+      },
+      {
+        "type": "assertion",
+        "description": "New message and response append smoothly"
+      }
+    ]
+  },
+  {
+    "id": "TC010",
+    "title": "Study Tools Panel - Generate Flashcards from Selected Sources",
+    "description": "Verify flashcard generation from selected sources works correctly and flashcards are added to the Study Tools panel.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Select sources in Sources panel"
+      },
+      {
+        "type": "action",
+        "description": "Switch to Flashcards tab in Study Tools panel"
+      },
+      {
+        "type": "action",
+        "description": "Generate flashcards from selected sources"
+      },
+      {
+        "type": "assertion",
+        "description": "Flashcards are created and displayed"
+      }
+    ]
+  },
+  {
+    "id": "TC011",
+    "title": "Study Tools Panel - Edit and Study Flashcards with Grading and Session Summary",
+    "description": "Verify editing flashcards, studying with grading, and displaying session summaries function as expected.",
+    "category": "functional",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Edit content of an existing flashcard"
+      },
+      {
+        "type": "assertion",
+        "description": "Changes are saved and reflected immediately"
+      },
+      {
+        "type": "action",
+        "description": "Enter study mode for flashcards"
+      },
+      {
+        "type": "action",
+        "description": "Grade flashcard responses"
+      },
+      {
+        "type": "assertion",
+        "description": "Session summary with grades and statistics is displayed correctly"
+      }
+    ]
+  },
+  {
+    "id": "TC012",
+    "title": "Study Tools Panel - Generate and Take MCQ Quizzes",
+    "description": "Verify quizzes are generated with configurable number and difficulty of questions, and taking quizzes shows results with explanations and citations.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Select sources for quiz content"
+      },
+      {
+        "type": "action",
+        "description": "Switch to Quizzes tab"
+      },
+      {
+        "type": "action",
+        "description": "Configure number of questions and difficulty"
+      },
+      {
+        "type": "action",
+        "description": "Generate quiz"
+      },
+      {
+        "type": "assertion",
+        "description": "MCQ quiz appears with expected questions"
+      },
+      {
+        "type": "action",
+        "description": "Complete the quiz"
+      },
+      {
+        "type": "assertion",
+        "description": "Display quiz results with explanations and citations"
+      }
+    ]
+  },
+  {
+    "id": "TC013",
+    "title": "Study Tools Panel - Mini-Game Term-Definition Matching",
+    "description": "Verify mini-game runs properly with correct term-definition content, scoring, and the ability to replay.",
+    "category": "functional",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Select sources to supply mini-game content"
+      },
+      {
+        "type": "action",
+        "description": "Switch to Mini-game tab"
+      },
+      {
+        "type": "action",
+        "description": "Start mini-game"
+      },
+      {
+        "type": "assertion",
+        "description": "Mini-game loads terms and definitions correctly"
+      },
+      {
+        "type": "action",
+        "description": "Complete a game session"
+      },
+      {
+        "type": "assertion",
+        "description": "Score is calculated and displayed correctly"
+      },
+      {
+        "type": "action",
+        "description": "Use replay function to restart the mini-game"
+      },
+      {
+        "type": "assertion",
+        "description": "Game restarts and resets state properly"
+      }
+    ]
+  },
+  {
+    "id": "TC014",
+    "title": "UI - Panel Resizing Persistence Across Sessions",
+    "description": "Verify that resizing the three panels on desktop persists correctly on refresh and new sessions.",
+    "category": "functional",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Resize Sources, Chat, and Study Tools panels using drag handles"
+      },
+      {
+        "type": "assertion",
+        "description": "Panel sizes update live during the resize"
+      },
+      {
+        "type": "action",
+        "description": "Reload the application"
+      },
+      {
+        "type": "assertion",
+        "description": "Panel sizes persist to last saved sizes"
+      }
+    ]
+  },
+  {
+    "id": "TC015",
+    "title": "UI - Responsive Drawer Behavior on Mobile/Tablet",
+    "description": "Verify that on mobile and tablet devices, panels collapse into drawers and user can toggle them properly.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Open application in mobile or tablet viewport"
+      },
+      {
+        "type": "assertion",
+        "description": "Panels collapse to drawers"
+      },
+      {
+        "type": "action",
+        "description": "Toggle each drawer open and close"
+      },
+      {
+        "type": "assertion",
+        "description": "Drawers open and close smoothly without layout issues"
+      }
+    ]
+  },
+  {
+    "id": "TC016",
+    "title": "UI - Fullscreen Toggle for Study Tools Panel",
+    "description": "Verify Study Tools panel fullscreen toggle overlays it properly and exits returning to previous layout preserving state.",
+    "category": "functional",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Click fullscreen toggle button on Study Tools panel"
+      },
+      {
+        "type": "assertion",
+        "description": "Study Tools panel occupies fullscreen overlay"
+      },
+      {
+        "type": "action",
+        "description": "Exit fullscreen mode"
+      },
+      {
+        "type": "assertion",
+        "description": "Panel returns to previous size and state is preserved"
+      }
+    ]
+  },
+  {
+    "id": "TC017",
+    "title": "Accessibility - Keyboard Navigation and Focus Management",
+    "description": "Verify full keyboard operability including tab navigation, arrow keys where applicable, and focus visible on interactive elements.",
+    "category": "ui",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate through the entire workspace using keyboard only"
+      },
+      {
+        "type": "assertion",
+        "description": "Focus moves sequentially and visibly across all interactive components"
+      },
+      {
+        "type": "action",
+        "description": "Use keyboard to interact with Add Source modal controls"
+      },
+      {
+        "type": "assertion",
+        "description": "Inputs and buttons are operable and focus trapped inside modals"
+      }
+    ]
+  },
+  {
+    "id": "TC018",
+    "title": "Accessibility - ARIA Roles and Modal Focus Trapping",
+    "description": "Verify ARIA roles are present and modals trap focus while open and release on close including ESC key handling.",
+    "category": "ui",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Open Add Source modal"
+      },
+      {
+        "type": "assertion",
+        "description": "Modal has correct ARIA roles and labels"
+      },
+      {
+        "type": "action",
+        "description": "Press tab key repeatedly to attempt leaving modal"
+      },
+      {
+        "type": "assertion",
+        "description": "Focus does not escape modal while open"
+      },
+      {
+        "type": "action",
+        "description": "Press ESC key"
+      },
+      {
+        "type": "assertion",
+        "description": "Modal closes and focus returns to previously focused element"
+      }
+    ]
+  },
+  {
+    "id": "TC019",
+    "title": "Performance - Time to First AI Chat Answer Under 2 Minutes",
+    "description": "Verify that after submitting a question, the first AI chat response arrives within 2 minutes maximum.",
+    "category": "performance",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Enter and submit question in Chat panel"
+      },
+      {
+        "type": "assertion",
+        "description": "First partial AI response arrives within 2 minutes"
+      }
+    ]
+  },
+  {
+    "id": "TC020",
+    "title": "Performance - Smooth Experience with Hundreds of Sources",
+    "description": "Verify that the Sources panel performs smoothly with hundreds of sources loaded using virtualization and lazy loading.",
+    "category": "performance",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Load 500+ sources in Sources panel"
+      },
+      {
+        "type": "assertion",
+        "description": "Sources panel scrolls smoothly without lag or UI freezes"
+      },
+      {
+        "type": "action",
+        "description": "Use search and multi-select on large source list"
+      },
+      {
+        "type": "assertion",
+        "description": "UI remains responsive and stable"
+      }
+    ]
+  },
+  {
+    "id": "TC021",
+    "title": "Analytics - Track Key User Interactions",
+    "description": "Verify analytics events for source_added, chat_sent, flashcards_generated, quiz_completed, and game_completed are correctly captured and reported.",
+    "category": "functional",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Add a new source"
+      },
+      {
+        "type": "assertion",
+        "description": "Event 'source_added' is sent"
+      },
+      {
+        "type": "action",
+        "description": "Send a chat message"
+      },
+      {
+        "type": "assertion",
+        "description": "Event 'chat_sent' is sent"
+      },
+      {
+        "type": "action",
+        "description": "Generate flashcards"
+      },
+      {
+        "type": "assertion",
+        "description": "Event 'flashcards_generated' is sent"
+      },
+      {
+        "type": "action",
+        "description": "Complete a quiz"
+      },
+      {
+        "type": "assertion",
+        "description": "Event 'quiz_completed' is sent"
+      },
+      {
+        "type": "action",
+        "description": "Complete mini-game"
+      },
+      {
+        "type": "assertion",
+        "description": "Event 'game_completed' is sent"
+      }
+    ]
+  },
+  {
+    "id": "TC022",
+    "title": "Security - Input Validation and Sanitization of Sources and Content",
+    "description": "Verify that all inputs for sources and user-created content are validated and sanitized to prevent injection or rendering vulnerabilities.",
+    "category": "security",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Attempt to add source with malicious script tags or malformed input"
+      },
+      {
+        "type": "assertion",
+        "description": "Input is sanitized and no scripts are executed"
+      },
+      {
+        "type": "action",
+        "description": "Render source content with special characters"
+      },
+      {
+        "type": "assertion",
+        "description": "Content is safely rendered without XSS or injection issues"
+      }
+    ]
+  }
+]
