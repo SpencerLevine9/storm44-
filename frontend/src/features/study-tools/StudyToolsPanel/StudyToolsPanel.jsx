@@ -49,7 +49,7 @@ function StudyToolsPanel() {
               variant="ghost"
               size="sm"
               onClick={() => setRightPanelWidthPreset(0.67)}
-              title="Resize to 2/3 width"
+              title="Resize view to 2/3 width"
             >
               2/3 Study
             </Button>
