@@ -9,28 +9,17 @@ import './WorkspacePage.css';
  * Main workspace page with 3-panel layout
  */
 function WorkspacePage() {
-  const [workspaceName, setWorkspaceName] = useState('My Study Workspace');
   const [conversationId, setConversationId] = useState(() => Date.now().toString());
 
   const handleNewChat = useCallback(() => {
-    // Reset conversation state
     setConversationId(Date.now().toString());
   }, []);
-
-  const handleRename = useCallback(() => {
-    const newName = prompt('Enter workspace name:', workspaceName);
-    if (newName && newName.trim()) {
-      setWorkspaceName(newName.trim());
-    }
-  }, [workspaceName]);
 
   return (
     <WorkspaceLayout
       header={
-        <Header 
-          workspaceName={workspaceName}
+        <Header
           onNewChat={handleNewChat}
-          onRename={handleRename}
         />
       }
       leftPanel={<SourcesPanel />}

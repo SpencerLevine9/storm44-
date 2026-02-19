@@ -1,19 +1,29 @@
 {
   "status": "commited",
   "type": "frontend",
-  "scope": "codebase",
+  "scope": "diff",
   "localEndpoint": "http://localhost:5173",
-  "loginUser": "ethan1019783",
-  "loginPassword": "Ishtar17!",
+  "loginUser": " ",
   "executionArgs": {
     "projectName": "frontend",
     "projectPath": "/Users/ethangonzalez/Desktop/storm44-/frontend",
-    "testIds": [],
-    "additionalInstruction": "",
+    "testIds": [
+      "TC001",
+      "TC002",
+      "TC005",
+      "TC006",
+      "TC008",
+      "TC009",
+      "TC011",
+      "TC014",
+      "TC016",
+      "TC021"
+    ],
+    "additionalInstruction": "Focus on the 10 selected tests covering: Notebook Dropdown (TC001 switch notebook, TC002 create notebook), Flashcard Deck List (TC005 empty state, TC006 create deck, TC008 open viewer, TC009 delete deck), Flashcard Viewer (TC011 flip card, TC014 empty deck state), Flashcard Form (TC016 add card), and Integration (TC021 end-to-end flow). The app has no login - it loads directly at localhost:5173. The Flashcards tab is in the right panel under Study Tools.",
     "envs": {
-      "API_KEY": "sk-user-GYJyZsgF5yphfLGwkcXK-slTnGfjJ-SWYsGXvVyenBJ0rL2qhwSVBRAXcgsZEhoDvvi_-0LPuR-OC9TEyJRcYAnubKJUbcElzVSnEGbqj3XnfRYfZ4OIOUiCgU_IhOKdkLA"
+      "API_KEY": "sk-user-Xr5HGQ0U-teH5WgXAtKMFRf1U0bkMcQ4atYGFT_MG856zTtF88TA4DKX6UxNAtjzB-9T6JnihEiSebRIAlP4-SXYeflsOi4n3ilJu7dE22ge3l9IAFUHGyGTQ__xZEvVVYE"
     }
   },
-  "serverPort": 53911,
-  "proxy": "http://2d9f989d-33dc-47c8-8df3-07699c49d0d9:fm4TwHlSP9jpFkFRCb77TK5M8mT8eP4d@tun.testsprite.com:8080"
+  "serverPort": 63851,
+  "proxy": "http://22a04493-2a8b-486e-bac1-6f39dbff281a:GyMi50KafqaXPtlC9Lhfv5rYhlSsqt3Z@tun.testsprite.com:8080"
 }

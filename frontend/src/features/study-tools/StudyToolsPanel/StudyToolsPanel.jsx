@@ -1,9 +1,11 @@
 import { useState } from 'react';
-import { BookOpen, HelpCircle, Gamepad2, Plus, Sparkles, Maximize2, Minimize2 } from 'lucide-react';
+import { BookOpen, HelpCircle, Gamepad2, Sparkles, Maximize2, Minimize2 } from 'lucide-react';
 import { Tabs, TabList, Tab, TabPanel } from '../../../components/ui/Tabs';
 import Button from '../../../components/ui/Button';
 import IconButton from '../../../components/ui/IconButton';
 import { useLayout } from '../../../components/layout/WorkspaceLayout/LayoutContext';
+import DeckList from '../DeckList/DeckList';
+import FlashcardViewer from '../FlashcardViewer/FlashcardViewer';
 import './StudyToolsPanel.css';
 
 // Storage key for persisting last selected tab
@@ -29,8 +31,12 @@ function StudyToolsPanel() {
     }
   });
 
+  // null = show deck list, string = show viewer for that deck
+  const [activeDeckId, setActiveDeckId] = useState(null);
+
   const handleTabChange = (value) => {
     setActiveTab(value);
+    setActiveDeckId(null); // Reset to deck list when switching tabs
     try {
       localStorage.setItem(TAB_STORAGE_KEY, value);
     } catch {
@@ -87,29 +93,14 @@ function StudyToolsPanel() {
         {/* Flashcards Panel */}
         <TabPanel value="flashcards">
           <div className="study-tools-panel__content">
-            <div className="study-tools-empty">
-              <BookOpen size={48} className="study-tools-empty__icon" />
-              <h3 className="study-tools-empty__title">No flashcards yet</h3>
-              <p className="study-tools-empty__text">
-                Generate flashcards from your selected sources to start studying.
-              </p>
-              <div className="study-tools-empty__actions">
-                <Button
-                  variant="primary"
-                  size="sm"
-                  leftIcon={<Sparkles size={16} />}
-                >
-                  Generate Flashcards
-                </Button>
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  leftIcon={<Plus size={16} />}
-                >
-                  Create Manually
-                </Button>
-              </div>
-            </div>
+            {activeDeckId ? (
+              <FlashcardViewer
+                deckId={activeDeckId}
+                onBack={() => setActiveDeckId(null)}
+              />
+            ) : (
+              <DeckList onSelectDeck={setActiveDeckId} />
+            )}
           </div>
         </TabPanel>
 
