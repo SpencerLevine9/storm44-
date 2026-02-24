@@ -1,34 +1,65 @@
 import { useState, useRef, useEffect } from 'react';
-import { Send, Sparkles, Copy, ThumbsUp, ThumbsDown } from 'lucide-react';
+import { Send, Zap, Copy, ThumbsUp, ThumbsDown } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import Button from '../../../components/ui/Button';
 import IconButton from '../../../components/ui/IconButton';
 import './ChatPanel.css';
 
-// Initial welcome message - created once outside component
-const createInitialMessage = () => ({
+const OPENAI_API_KEY = import.meta.env.VITE_OPENAI_API_KEY;
+const OPENAI_API_URL = 'https://api.openai.com/v1/chat/completions';
+const SYSTEM_PROMPT =
+  'You are a helpful AI study assistant. You must be brief and concise. ' +
+  'Your responses must never exceed 10 sentences. Use markdown formatting when appropriate.';
+const TEXTAREA_MAX_HEIGHT = 180; // 8 lines: 15px font * 1.5 line-height * 8
+
+const INITIAL_MESSAGE = {
   id: '1',
   role: 'assistant',
-  content: 'Hello! I\'m your AI study assistant. I can help you understand your sources, answer questions, and create study materials. What would you like to explore today?',
+  content:
+    "Hello! I'm your AI study assistant. I can help you understand your sources, " +
+    'answer questions, and create study materials. What would you like to explore today?',
   timestamp: new Date().toISOString(),
-});
+};
+
+function formatTime(timestamp) {
+  return new Date(timestamp).toLocaleTimeString([], {
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+}
 
 /**
- * Chat panel - center area for conversation
+ * Chat panel — center area for AI conversation.
  */
 function ChatPanel() {
-  const [messages, setMessages] = useState(() => [createInitialMessage()]);
+  const [messages, setMessages] = useState([INITIAL_MESSAGE]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef(null);
   const textareaRef = useRef(null);
 
-  const scrollToBottom = () => {
+  useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
+  const resizeTextarea = () => {
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+    textarea.style.height = 'auto';
+    textarea.style.height = `${Math.min(textarea.scrollHeight, TEXTAREA_MAX_HEIGHT)}px`;
   };
 
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
+  const resetTextareaHeight = () => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto';
+    }
+  };
+
+  const handleInputChange = (e) => {
+    setInputValue(e.target.value);
+    resizeTextarea();
+  };
 
   const handleSend = async () => {
     if (!inputValue.trim() || isLoading) return;
@@ -40,24 +71,59 @@ function ChatPanel() {
       timestamp: new Date().toISOString(),
     };
 
-    setMessages(prev => [...prev, userMessage]);
+    setMessages((prev) => [...prev, userMessage]);
     setInputValue('');
+    resetTextareaHeight();
     setIsLoading(true);
 
-    // Simulate AI response
-    setTimeout(() => {
-      const assistantMessage = {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        content: 'This is a simulated response. In the full implementation, this would be a streaming response from your AI backend with citations to your selected sources. The response would include inline citations like [1] that link back to specific passages in your documents.',
-        timestamp: new Date().toISOString(),
-        citations: [
-          { id: '1', sourceId: '1', text: 'Introduction to Machine Learning, p.12' }
-        ]
-      };
-      setMessages(prev => [...prev, assistantMessage]);
+    try {
+      const response = await fetch(OPENAI_API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${OPENAI_API_KEY}`,
+        },
+        body: JSON.stringify({
+          model: 'gpt-4o-mini',
+          messages: [
+            { role: 'system', content: SYSTEM_PROMPT },
+            { role: 'user', content: userMessage.content },
+          ],
+          max_tokens: 500,
+          temperature: 0.7,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error?.message || `API error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      const content = data.choices?.[0]?.message?.content || 'No response received.';
+
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: (Date.now() + 1).toString(),
+          role: 'assistant',
+          content,
+          timestamp: new Date().toISOString(),
+        },
+      ]);
+    } catch (error) {
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: (Date.now() + 1).toString(),
+          role: 'assistant',
+          content: `**Error:** ${error.message || 'Failed to get a response. Please check your API key and try again.'}`,
+          timestamp: new Date().toISOString(),
+        },
+      ]);
+    } finally {
       setIsLoading(false);
-    }, 1500);
+    }
   };
 
   const handleKeyDown = (e) => {
@@ -65,13 +131,6 @@ function ChatPanel() {
       e.preventDefault();
       handleSend();
     }
-  };
-
-  const formatTime = (timestamp) => {
-    return new Date(timestamp).toLocaleTimeString([], { 
-      hour: '2-digit', 
-      minute: '2-digit' 
-    });
   };
 
   return (
@@ -83,28 +142,19 @@ function ChatPanel() {
             key={message.id} 
             className={`message message--${message.role}`}
           >
-            <div className="message__avatar">
-              {message.role === 'assistant' ? (
-                <Sparkles size={18} />
-              ) : (
-                <span>You</span>
-              )}
-            </div>
+            {message.role === 'assistant' && (
+              <div className="message__avatar">
+                <Zap size={18} />
+              </div>
+            )}
             <div className="message__content">
               <div className="message__bubble">
-                <p className="message__text">{message.content}</p>
-                {message.citations && message.citations.length > 0 && (
-                  <div className="message__citations">
-                    {message.citations.map(citation => (
-                      <button 
-                        key={citation.id}
-                        className="citation-chip"
-                        title={citation.text}
-                      >
-                        [{citation.id}] {citation.text}
-                      </button>
-                    ))}
+                {message.role === 'assistant' ? (
+                  <div className="message__text">
+                    <ReactMarkdown remarkPlugins={[remarkGfm]}>{message.content}</ReactMarkdown>
                   </div>
+                ) : (
+                  <p className="message__text">{message.content}</p>
                 )}
               </div>
               <div className="message__meta">
@@ -130,7 +180,7 @@ function ChatPanel() {
         {isLoading && (
           <div className="message message--assistant">
             <div className="message__avatar">
-              <Sparkles size={18} />
+              <Zap size={18} />
             </div>
             <div className="message__content">
               <div className="message__bubble message__bubble--loading">
@@ -155,7 +205,7 @@ function ChatPanel() {
             className="composer__input"
             placeholder="Ask about your sources..."
             value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
+            onChange={handleInputChange}
             onKeyDown={handleKeyDown}
             rows={1}
             disabled={isLoading}
