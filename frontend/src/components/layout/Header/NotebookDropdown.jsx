@@ -63,13 +63,15 @@ function NotebookDropdown() {
 
   const handleCreate = (e) => {
     e.stopPropagation();
-    createNotebook();
+    const newNotebook = createNotebook();
+    setEditingId(newNotebook.id);
+    setEditValue(newNotebook.name);
   };
 
   return (
     <Dropdown className="notebook-dropdown">
       <DropdownTrigger>
-        <button className="notebook-dropdown__trigger" type="button">
+        <button className="notebook-dropdown__trigger" type="button" data-testid="notebook-dropdown-trigger">
           <span className="notebook-dropdown__name">
             {activeNotebook?.name || 'Select Notebook'}
           </span>
@@ -86,6 +88,7 @@ function NotebookDropdown() {
               onClick={() => { if (!editingId) switchNotebook(notebook.id); }}
               role="menuitem"
               tabIndex={0}
+              data-testid={`notebook-item-${notebook.id}`}
             >
               {editingId === notebook.id ? (
                 <div className="notebook-dropdown__edit" onClick={e => e.stopPropagation()}>
@@ -99,7 +102,7 @@ function NotebookDropdown() {
                   />
                   <button
                     className="notebook-dropdown__edit-btn"
-                    onClick={confirmRename}
+                    onMouseDown={e => { e.preventDefault(); confirmRename(); }}
                     type="button"
                     aria-label="Confirm rename"
                   >
@@ -116,7 +119,7 @@ function NotebookDropdown() {
                 </div>
               ) : (
                 <>
-                  <span className="notebook-dropdown__item-name">{notebook.name}</span>
+                  <span className="notebook-dropdown__item-name" data-testid={`notebook-name-${notebook.id}`}>{notebook.name}</span>
                   <div className="notebook-dropdown__item-actions">
                     <button
                       className="notebook-dropdown__action-btn"
@@ -147,6 +150,7 @@ function NotebookDropdown() {
             className="notebook-dropdown__create-btn"
             onClick={handleCreate}
             type="button"
+            data-testid="notebook-create-btn"
           >
             <Plus size={14} />
             <span>New Notebook</span>

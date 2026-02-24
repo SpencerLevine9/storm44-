@@ -74,6 +74,10 @@ function WorkspaceLayout({
   const [studyToolsFullscreen, setStudyToolsFullscreen] = useState(false);
   const [preFullscreenSnapshot, setPreFullscreenSnapshot] = useState(null);
 
+  // AR-02: 2/3 Preset State
+  const [studyPresetActive, setStudyPresetActive] = useState(false);
+  const [prePresetSnapshot, setPrePresetSnapshot] = useState(null);
+
   const layoutRef = useRef(null);
   const isResizing = useRef(null);
 
@@ -93,10 +97,10 @@ function WorkspaceLayout({
 
   // Persist state changes (only normal layout)
   useEffect(() => {
-    if (!studyToolsFullscreen) {
+    if (!studyToolsFullscreen && !studyPresetActive) {
       persistState({ leftCollapsed, rightCollapsed, leftWidth, rightWidth });
     }
-  }, [leftCollapsed, rightCollapsed, leftWidth, rightWidth, studyToolsFullscreen]);
+  }, [leftCollapsed, rightCollapsed, leftWidth, rightWidth, studyToolsFullscreen, studyPresetActive]);
 
   // Toggle functions
   const toggleLeftPanel = useCallback(() => {
@@ -145,34 +149,44 @@ function WorkspaceLayout({
     }
   }, [preFullscreenSnapshot]);
 
-  // AR-02: Preset Logic
-  const setRightPanelWidthPreset = useCallback((ratio) => {
+  // AR-02: Preset Logic — collapse sources, chat 1/3, study tools 2/3
+  const setRightPanelWidthPreset = useCallback(() => {
     if (typeof window === 'undefined') return;
+
+    // Save current state so we can revert later
+    setPrePresetSnapshot({
+      leftCollapsed,
+      rightCollapsed,
+      leftWidth,
+      rightWidth,
+    });
+
     const totalWidth = window.innerWidth;
-    const targetWidth = Math.floor(totalWidth * ratio);
+    const targetRightWidth = Math.floor(totalWidth * (2 / 3));
 
-    // Ensure min constraints
-    // Chat min width = 320px. 
-    // Chat width ~= Total - Left (if open) - Right.
-    // But requirement says "Chat width is remaining center area".
-    // If Left is open, Chat = Total - Left - Right.
-    // We should probably preserve left panel state?
-    // "Set Chat width to 33% viewport... Set Study Tools width to 67%".
-    // This implies Left Panel might need to be collapsed to honor strict 33/67 ratio of VIEWPORT.
-    // Making an executive decision: If 2/3 preset is clicked, we ensure Study is 2/3.
-    // We try to keep Left Panel as is, but if Chat becomes < 320, we might need to squeeze or auto-collapse left?
-    // For simplicity: Set right width, obey min/max.
+    setLeftCollapsed(true);       // Collapse sources panel
+    setRightCollapsed(false);     // Ensure study tools open
+    setRightWidth(Math.max(minRightWidth, targetRightWidth));
+    setStudyPresetActive(true);
+  }, [leftCollapsed, rightCollapsed, leftWidth, rightWidth, minRightWidth]);
 
-    // Check constraint: Min Chat Width = 320.
-    // We need to know current Left width usage.
-    const currentLeftWidth = (leftCollapsed || isMobile) ? 0 : leftWidth;
-    const maxAllowedRightWidth = totalWidth - currentLeftWidth - 320; // Reserve 320 for Chat
-
-    const finalWidth = Math.min(targetWidth, maxAllowedRightWidth);
-
-    setRightWidth(Math.max(minRightWidth, finalWidth));
-    setRightCollapsed(false); // Ensure open
-  }, [leftCollapsed, isMobile, leftWidth, minRightWidth]);
+  // Revert preset — restore panels to defaults
+  const revertPreset = useCallback(() => {
+    if (prePresetSnapshot) {
+      setLeftCollapsed(prePresetSnapshot.leftCollapsed);
+      setRightCollapsed(prePresetSnapshot.rightCollapsed);
+      setLeftWidth(prePresetSnapshot.leftWidth);
+      setRightWidth(prePresetSnapshot.rightWidth);
+      setPrePresetSnapshot(null);
+    } else {
+      // Fallback to prop defaults
+      setLeftCollapsed(defaultLeftCollapsed);
+      setRightCollapsed(defaultRightCollapsed);
+      setLeftWidth(defaultLeftWidth);
+      setRightWidth(defaultRightWidth);
+    }
+    setStudyPresetActive(false);
+  }, [prePresetSnapshot, defaultLeftCollapsed, defaultRightCollapsed, defaultLeftWidth, defaultRightWidth]);
 
 
   // Resize handling
@@ -264,6 +278,8 @@ function WorkspaceLayout({
     enterFullscreen,
     exitFullscreen,
     setRightPanelWidthPreset,
+    studyPresetActive,
+    revertPreset,
   };
 
   return (

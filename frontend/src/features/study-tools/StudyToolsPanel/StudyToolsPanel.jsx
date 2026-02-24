@@ -20,6 +20,8 @@ function StudyToolsPanel() {
     enterFullscreen,
     exitFullscreen,
     setRightPanelWidthPreset,
+    studyPresetActive,
+    revertPreset,
     isMobile
   } = useLayout();
 
@@ -51,14 +53,25 @@ function StudyToolsPanel() {
         <h2 className="panel-header__title">Study Tools</h2>
         <div className="panel-header__actions">
           {!isMobile && !studyToolsFullscreen && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setRightPanelWidthPreset(0.67)}
-              title="Resize view to 2/3 width"
-            >
-              2/3 Study
-            </Button>
+            studyPresetActive ? (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={revertPreset}
+                title="Revert to default layout"
+              >
+                Revert
+              </Button>
+            ) : (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={setRightPanelWidthPreset}
+                title="Resize view to 2/3 width"
+              >
+                2/3 Study
+              </Button>
+            )
           )}
           <IconButton
             variant="ghost"

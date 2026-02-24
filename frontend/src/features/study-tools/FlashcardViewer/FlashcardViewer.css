@@ -110,8 +110,6 @@
 
 .flashcard-viewer__face--back {
   transform: rotateY(180deg);
-  background-color: var(--color-primary-subtle);
-  border-color: var(--color-primary);
 }
 
 .flashcard-viewer__face-label {
