@@ -1,3 +1,26 @@
 # Machine Learning Data
 machine_learning/data
 machine_learning/artifacts
+machine_learning/secrets
+
+# Audio / video artifacts
+*.wav
+
+# Secrets
+machine_learning/secrets/
+node_modules/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.env
+
+# Backend Data
+backend/data/
+*.log
+
+# Testing
+.pytest_cache/
+.mypy_cache/
