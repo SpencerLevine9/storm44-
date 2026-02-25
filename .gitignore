@@ -1,3 +1,10 @@
 # Machine Learning Data
 machine_learning/data
 machine_learning/artifacts
+machine_learning/secrets
+
+# Audio / video artifacts
+*.wav
+
+# Secrets
+machine_learning/secrets/
