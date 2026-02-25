@@ -1,0 +1,866 @@
+[
+  {
+    "id": "TC001",
+    "title": "Switch active notebook from header dropdown",
+    "description": "Verifies users can open the notebook dropdown, see the active highlight, and switch to another notebook with the header updating.",
+    "category": "Notebook Dropdown Selector",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Click notebook name in header to open dropdown"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element visible: list of notebooks with active notebook highlighted"
+      },
+      {
+        "type": "action",
+        "description": "Click a notebook to switch to it"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text visible: the selected notebook name in the header"
+      }
+    ]
+  },
+  {
+    "id": "TC002",
+    "title": "Create a new notebook and confirm inline rename with Enter",
+    "description": "Verifies creating a new notebook from the dropdown and confirming its name via Enter updates the active notebook in the header.",
+    "category": "Notebook Dropdown Selector",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Click notebook name in header to open dropdown"
+      },
+      {
+        "type": "action",
+        "description": "Click \"New Notebook\" button at bottom of dropdown to create a new notebook"
+      },
+      {
+        "type": "action",
+        "description": "Type/Fill New Notebook A into the inline rename field"
+      },
+      {
+        "type": "action",
+        "description": "Press key Enter"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text visible: New Notebook A in the header"
+      }
+    ]
+  },
+  {
+    "id": "TC003",
+    "title": "Inline rename an existing notebook and cancel with Escape",
+    "description": "Verifies inline rename mode can be entered and canceled with Escape without changing the notebook name.",
+    "category": "Notebook Dropdown Selector",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Click notebook name in header to open dropdown"
+      },
+      {
+        "type": "action",
+        "description": "Click pencil icon to start inline rename of a notebook"
+      },
+      {
+        "type": "action",
+        "description": "Type/Fill Renamed Notebook Attempt into the inline rename field"
+      },
+      {
+        "type": "action",
+        "description": "Press Escape or click X to cancel rename"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text visible: the original notebook name unchanged"
+      }
+    ]
+  },
+  {
+    "id": "TC004",
+    "title": "Inline rename an existing notebook and confirm with Enter",
+    "description": "Verifies inline renaming a notebook and confirming with Enter updates the notebook name in the UI.",
+    "category": "Notebook Dropdown Selector",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Click notebook name in header to open dropdown"
+      },
+      {
+        "type": "action",
+        "description": "Click pencil icon to start inline rename of a notebook"
+      },
+      {
+        "type": "action",
+        "description": "Type/Fill Notebook Renamed 1 into the inline rename field"
+      },
+      {
+        "type": "action",
+        "description": "Press key Enter"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text visible: Notebook Renamed 1 in the dropdown list"
+      }
+    ]
+  },
+  {
+    "id": "TC005",
+    "title": "Empty state shows Create Deck when no decks exist",
+    "description": "Verifies the Flashcards tab shows an empty state with a Create Deck button when there are no decks.",
+    "category": "Flashcard Deck List",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Click Study Tools tab in right panel"
+      },
+      {
+        "type": "action",
+        "description": "Click Flashcards tab"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text visible \"Create Deck\""
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element visible \"Create Deck\" button"
+      }
+    ]
+  },
+  {
+    "id": "TC006",
+    "title": "Create a new deck via inline rename and confirm with Enter",
+    "description": "Verifies a user can create a deck and confirm the name via the inline rename field, and the deck appears in the grid with metadata.",
+    "category": "Flashcard Deck List",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Click Study Tools tab in right panel"
+      },
+      {
+        "type": "action",
+        "description": "Click Flashcards tab"
+      },
+      {
+        "type": "action",
+        "description": "Click \"Create Deck\" or \"New Deck\" button to create a new deck with inline rename"
+      },
+      {
+        "type": "action",
+        "description": "Type/Fill \"Biology Deck\" into deck name inline rename field"
+      },
+      {
+        "type": "action",
+        "description": "Press key Enter"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text visible \"Biology Deck\""
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text visible \"0\""
+      }
+    ]
+  },
+  {
+    "id": "TC007",
+    "title": "Deck card displays card count and last studied time",
+    "description": "Verifies each deck card shows card count and last-studied time in the grid.",
+    "category": "Flashcard Deck List",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Click Study Tools tab in right panel"
+      },
+      {
+        "type": "action",
+        "description": "Click Flashcards tab"
+      },
+      {
+        "type": "action",
+        "description": "Click \"Create Deck\" or \"New Deck\" button to create a new deck with inline rename"
+      },
+      {
+        "type": "action",
+        "description": "Type/Fill \"History Deck\" into deck name inline rename field"
+      },
+      {
+        "type": "action",
+        "description": "Press key Enter"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text visible \"0\""
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text visible \"Last studied\""
+      }
+    ]
+  },
+  {
+    "id": "TC008",
+    "title": "Open flashcard viewer by clicking a deck card",
+    "description": "Verifies clicking a deck card opens the flashcard viewer with the correct deck title and card count visible.",
+    "category": "Flashcard Deck List",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Click Study Tools tab in right panel"
+      },
+      {
+        "type": "action",
+        "description": "Click Flashcards tab"
+      },
+      {
+        "type": "action",
+        "description": "Click \"Create Deck\" or \"New Deck\" button to create a new deck with inline rename"
+      },
+      {
+        "type": "action",
+        "description": "Type/Fill \"Chemistry Deck\" into deck name inline rename field"
+      },
+      {
+        "type": "action",
+        "description": "Press key Enter"
+      },
+      {
+        "type": "action",
+        "description": "Click a deck card to open the flashcard viewer for that deck"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text visible \"Chemistry Deck\""
+      }
+    ]
+  },
+  {
+    "id": "TC009",
+    "title": "Delete a deck removes it from the grid",
+    "description": "Verifies deleting a deck removes it from the deck grid (and confirmation is handled if shown).",
+    "category": "Flashcard Deck List",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Click Study Tools tab in right panel"
+      },
+      {
+        "type": "action",
+        "description": "Click Flashcards tab"
+      },
+      {
+        "type": "action",
+        "description": "Click \"Create Deck\" or \"New Deck\" button to create a new deck with inline rename"
+      },
+      {
+        "type": "action",
+        "description": "Type/Fill \"Temp Deck\" into deck name inline rename field"
+      },
+      {
+        "type": "action",
+        "description": "Press key Enter"
+      },
+      {
+        "type": "action",
+        "description": "Click trash icon on a deck card to delete it"
+      },
+      {
+        "type": "action",
+        "description": "Click Confirm deletion if prompted"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text visible \"Create Deck\""
+      }
+    ]
+  },
+  {
+    "id": "TC010",
+    "title": "Open flashcard viewer shows deck title and card count in header",
+    "description": "Verifies that opening a deck from Flashcards tab displays the viewer header with deck title and card count.",
+    "category": "Flashcard Viewer with 3D Flip",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Click Study Tools tab in right panel and select Flashcards tab"
+      },
+      {
+        "type": "action",
+        "description": "Click a deck card to open the flashcard viewer for that deck"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element visible: deck title in viewer header"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text visible: card count in viewer header"
+      }
+    ]
+  },
+  {
+    "id": "TC011",
+    "title": "Flip card via click toggles between front and back content",
+    "description": "Verifies clicking the card flips between front/back and opposite side content becomes visible.",
+    "category": "Flashcard Viewer with 3D Flip",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Click Study Tools tab in right panel and select Flashcards tab"
+      },
+      {
+        "type": "action",
+        "description": "Click a deck card to open the flashcard viewer for that deck"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element visible: flashcard front side content"
+      },
+      {
+        "type": "action",
+        "description": "Click card or press Space/Enter to flip between front and back"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element visible: flashcard back side content"
+      }
+    ]
+  },
+  {
+    "id": "TC012",
+    "title": "Flip card via keyboard (Space) shows opposite side",
+    "description": "Verifies keyboard shortcut Space flips the card to show the opposite side content.",
+    "category": "Flashcard Viewer with 3D Flip",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Click Study Tools tab in right panel and select Flashcards tab"
+      },
+      {
+        "type": "action",
+        "description": "Click a deck card to open the flashcard viewer for that deck"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element visible: flashcard front side content"
+      },
+      {
+        "type": "action",
+        "description": "Click card or press Space/Enter to flip between front and back"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element visible: flashcard back side content"
+      }
+    ]
+  },
+  {
+    "id": "TC013",
+    "title": "Navigate to next card updates progress indicator",
+    "description": "Verifies moving to the next card changes the visible card content and updates the progress bar position.",
+    "category": "Flashcard Viewer with 3D Flip",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Click Study Tools tab in right panel and select Flashcards tab"
+      },
+      {
+        "type": "action",
+        "description": "Click a deck card to open the flashcard viewer for that deck"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element visible: progress bar showing position within deck"
+      },
+      {
+        "type": "action",
+        "description": "Click left/right arrows or press arrow keys to navigate between cards"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element visible: flashcard content for the next card"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element visible: progress bar showing position within deck"
+      }
+    ]
+  },
+  {
+    "id": "TC014",
+    "title": "Empty deck shows empty state and Add Card opens add card form",
+    "description": "Verifies that a deck with no cards shows an empty state and the Add Card entry point opens the add card form.",
+    "category": "Flashcard Viewer with 3D Flip",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Click Study Tools tab and select Flashcards tab"
+      },
+      {
+        "type": "action",
+        "description": "Click a deck card for a deck that has no cards"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text visible: empty state when deck has no cards"
+      },
+      {
+        "type": "action",
+        "description": "Click \"Add Card\" button to open the add card form"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element visible: add card form"
+      }
+    ]
+  },
+  {
+    "id": "TC015",
+    "title": "End-of-deck: pressing ArrowRight on last card shows end state or no change indicator",
+    "description": "Verifies that attempting to advance past the last card results in an end-of-deck indicator or no navigation change with an indicator.",
+    "category": "Flashcard Viewer with 3D Flip",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Click Study Tools tab and select Flashcards tab"
+      },
+      {
+        "type": "action",
+        "description": "Click a deck card to open flashcard viewer"
+      },
+      {
+        "type": "action",
+        "description": "Click left/right arrows or press arrow keys to navigate between cards"
+      },
+      {
+        "type": "action",
+        "description": "Click left/right arrows or press arrow keys to navigate between cards"
+      },
+      {
+        "type": "action",
+        "description": "On the last card press ArrowRight"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text visible: end-of-deck state or an indicator that user is at the last card"
+      }
+    ]
+  },
+  {
+    "id": "TC016",
+    "title": "Add Card saves a new flashcard and returns to viewer with incremented count",
+    "description": "Verifies adding a flashcard via Add Card saves the card and returns to the viewer with the card count increased.",
+    "category": "Flashcard Form",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Click \"Study Tools\" tab and select \"Flashcards\" tab"
+      },
+      {
+        "type": "action",
+        "description": "Click a flashcard deck to open it in the flashcard viewer"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element visible: \"Add Card\" button"
+      },
+      {
+        "type": "action",
+        "description": "Click \"Add Card\" button to open the flashcard form"
+      },
+      {
+        "type": "action",
+        "description": "Fill in front text field with question or term"
+      },
+      {
+        "type": "action",
+        "description": "Fill in back text field with answer or definition"
+      },
+      {
+        "type": "action",
+        "description": "Click \"Add Card\" to save card and return to viewer"
+      }
+    ]
+  },
+  {
+    "id": "TC017",
+    "title": "Add & Another saves a new flashcard and clears the form for another entry",
+    "description": "Verifies Add & Another saves the card and keeps the user on the form with cleared inputs for the next card.",
+    "category": "Flashcard Form",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Click \"Study Tools\" tab and select \"Flashcards\" tab"
+      },
+      {
+        "type": "action",
+        "description": "Click a flashcard deck to open it in the flashcard viewer"
+      },
+      {
+        "type": "action",
+        "description": "Click \"Add Card\" button to open the flashcard form"
+      },
+      {
+        "type": "action",
+        "description": "Fill in front text field with question or term"
+      },
+      {
+        "type": "action",
+        "description": "Fill in back text field with answer or definition"
+      },
+      {
+        "type": "action",
+        "description": "Click \"Add & Another\" to save card and stay on form for another"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element visible: \"Add & Another\" button"
+      }
+    ]
+  },
+  {
+    "id": "TC018",
+    "title": "Submit is disabled when front field is empty",
+    "description": "Verifies the submit action is blocked (disabled) when the front field is empty and back is filled.",
+    "category": "Flashcard Form",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Click \"Study Tools\" tab and select \"Flashcards\" tab"
+      },
+      {
+        "type": "action",
+        "description": "Click a flashcard deck to open it in the flashcard viewer"
+      },
+      {
+        "type": "action",
+        "description": "Click \"Add Card\" button to open the flashcard form"
+      },
+      {
+        "type": "action",
+        "description": "Fill in back text field with answer or definition"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text visible: \"Submit button is disabled when either field is empty\""
+      }
+    ]
+  },
+  {
+    "id": "TC019",
+    "title": "Submit is disabled when back field is empty",
+    "description": "Verifies the submit action is blocked (disabled) when the back field is empty and front is filled.",
+    "category": "Flashcard Form",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Click \"Study Tools\" tab and select \"Flashcards\" tab"
+      },
+      {
+        "type": "action",
+        "description": "Click a flashcard deck to open it in the flashcard viewer"
+      },
+      {
+        "type": "action",
+        "description": "Click \"Add Card\" button to open the flashcard form"
+      },
+      {
+        "type": "action",
+        "description": "Fill in front text field with question or term"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text visible: \"Submit button is disabled when either field is empty\""
+      }
+    ]
+  },
+  {
+    "id": "TC020",
+    "title": "Cancel discards the form and returns to viewer",
+    "description": "Verifies Cancel exits the flashcard form without saving and returns to the flashcard viewer.",
+    "category": "Flashcard Form",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Click \"Study Tools\" tab and select \"Flashcards\" tab"
+      },
+      {
+        "type": "action",
+        "description": "Click a flashcard deck to open it in the flashcard viewer"
+      },
+      {
+        "type": "action",
+        "description": "Click \"Add Card\" button to open the flashcard form"
+      },
+      {
+        "type": "action",
+        "description": "Fill in front text field with question or term"
+      },
+      {
+        "type": "action",
+        "description": "Fill in back text field with answer or definition"
+      },
+      {
+        "type": "action",
+        "description": "Click \"Cancel\" to discard and return to viewer"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element visible: \"Add Card\" button"
+      }
+    ]
+  },
+  {
+    "id": "TC021",
+    "title": "Create notebook, create deck in active notebook, add flashcard, and verify immediate UI propagation",
+    "description": "Verifies that creating a notebook, deck, and flashcard updates visible UI across header/study tools/flashcard viewer without reload.",
+    "category": "Notebook and Flashcard Context Providers",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Click notebook dropdown to create a new notebook"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text visible in the header showing the newly created notebook name"
+      },
+      {
+        "type": "action",
+        "description": "Click in Study Tools to create a new deck (scoped to the active notebook)"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text visible for the new deck in the deck list"
+      },
+      {
+        "type": "action",
+        "description": "Click to add a flashcard to the deck"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element visible for the newly added flashcard in the flashcard viewer/list"
+      }
+    ]
+  },
+  {
+    "id": "TC022",
+    "title": "State consistency across components while switching notebook selection",
+    "description": "Verifies that notebook dropdown selection drives consistent deck/card visibility across components without reload.",
+    "category": "Notebook and Flashcard Context Providers",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Click notebook dropdown to create a new notebook"
+      },
+      {
+        "type": "action",
+        "description": "Click in Study Tools to create a new deck (scoped to the active notebook)"
+      },
+      {
+        "type": "action",
+        "description": "Click to add a flashcard to the deck"
+      },
+      {
+        "type": "action",
+        "description": "Click notebook dropdown to create a new notebook"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text visible in the header showing the newly selected notebook name"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text visible indicating the previous deck/flashcard are not shown under the newly active notebook"
+      }
+    ]
+  },
+  {
+    "id": "TC023",
+    "title": "Multiple decks and cards added reflect immediately in visible lists",
+    "description": "Verifies CRUD-like additions (multiple decks and cards) appear immediately and remain visible during the session.",
+    "category": "Notebook and Flashcard Context Providers",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Click notebook dropdown to create a new notebook"
+      },
+      {
+        "type": "action",
+        "description": "Click in Study Tools to create a new deck (scoped to the active notebook)"
+      },
+      {
+        "type": "action",
+        "description": "Click to add a flashcard to the deck"
+      },
+      {
+        "type": "action",
+        "description": "Click in Study Tools to create a new deck (scoped to the active notebook)"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text visible for both decks in the deck list"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element visible for at least one flashcard under the active notebook/session"
+      }
+    ]
+  },
+  {
+    "id": "TC024",
+    "title": "Refresh resets notebook/deck/flashcard state (in-memory only)",
+    "description": "Verifies that after a browser refresh, notebooks and flashcards revert to initial state and previously created items are lost.",
+    "category": "Notebook and Flashcard Context Providers",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Click notebook dropdown to create a new notebook"
+      },
+      {
+        "type": "action",
+        "description": "Click in Study Tools to create a new deck (scoped to the active notebook)"
+      },
+      {
+        "type": "action",
+        "description": "Click to add a flashcard to the deck"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text visible indicating notebooks are reset to initial/default state (previous notebook name not shown)"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text visible indicating decks/flashcards are reset (previously created deck/card not shown)"
+      }
+    ]
+  }
+]

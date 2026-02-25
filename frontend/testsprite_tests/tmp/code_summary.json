@@ -1,0 +1,50 @@
+{
+    "tech_stack": [
+        "React",
+        "Vite",
+        "Lucide-React",
+        "react-router-dom"
+    ],
+    "features": [
+        {
+            "name": "Chat Feature",
+            "description": "Chat functionality for the application",
+            "files": [
+                "src/features/chat/ChatPanel/index.js",
+                "src/features/chat/ChatPanel/ChatPanel.jsx"
+            ]
+        },
+        {
+            "name": "Sources Feature",
+            "description": "Components for managing sources including add source modal",
+            "files": [
+                "src/features/sources/AddSourceModal/AddSourceModal.jsx",
+                "src/features/sources/SourcesPanel/SourcesPanel.jsx"
+            ]
+        },
+        {
+            "name": "Study Tools Feature",
+            "description": "Tools for studying related functionalities",
+            "files": [
+                "src/features/study-tools/StudyToolsPanel/StudyToolsPanel.jsx"
+            ]
+        },
+        {
+            "name": "Layout Components",
+            "description": "Basic structure components such as Header and Workspace Layout",
+            "files": [
+                "src/components/layout/Header/Header.jsx",
+                "src/components/layout/WorkspaceLayout/WorkspaceLayout.jsx",
+                "src/components/layout/index.js"
+            ]
+        },
+        {
+            "name": "Workspace Page",
+            "description": "Main page for the workspace",
+            "files": [
+                "src/pages/WorkspacePage/WorkspacePage.jsx",
+                "src/pages/WorkspacePage/index.js"
+            ]
+        }
+    ]
+}

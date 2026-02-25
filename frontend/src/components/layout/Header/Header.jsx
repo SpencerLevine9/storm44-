@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  Menu, 
-  Plus, 
-  Settings, 
+import {
+  Menu,
+  Plus,
+  Settings,
   BookOpen,
   PanelLeft,
   PanelRight,
@@ -24,15 +24,14 @@ import {
   DropdownSeparator,
   DropdownLabel,
 } from '../../ui/Dropdown';
+import NotebookDropdown from './NotebookDropdown';
 import './Header.css';
 
 /**
  * App header with workspace title and navigation
  */
-function Header({ 
-  workspaceName = 'Untitled Workspace',
+function Header({
   onNewChat,
-  onRename,
 }) {
   const navigate = useNavigate();
   const layout = useLayout();
@@ -72,16 +71,10 @@ function Header({
           <span className="header__app-name">Storm44</span>
         </div>
 
-        {/* Workspace name */}
+        {/* Notebook selector */}
         <div className="header__workspace">
           <span className="header__separator">/</span>
-          <button 
-            className="header__workspace-name"
-            onClick={onRename}
-            title="Click to rename"
-          >
-            {workspaceName}
-          </button>
+          <NotebookDropdown />
         </div>
       </div>
 

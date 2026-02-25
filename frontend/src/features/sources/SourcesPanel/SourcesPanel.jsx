@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import { 
-  Plus, 
-  Upload, 
-  Link, 
-  FileText, 
+import {
+  Plus,
+  Upload,
+  Link,
+  FileText,
   Search,
   MoreVertical,
   File,
@@ -21,12 +21,15 @@ import {
   DropdownSeparator,
 } from '../../../components/ui/Dropdown';
 import { SkeletonListItem } from '../../../components/ui/Skeleton';
+import { AddSourceProvider, useAddSourceModal } from '../AddSourceModal/AddSourceContext';
+import AddSourceModal from '../AddSourceModal/AddSourceModal';
 import './SourcesPanel.css';
 
 /**
- * Sources panel - left sidebar for managing sources
+ * Sources panel content - separated to use context
  */
-function SourcesPanel() {
+function SourcesPanelContent() {
+  const { openModal } = useAddSourceModal();
   const [searchQuery, setSearchQuery] = useState('');
   const [sources, setSources] = useState([
     { id: '1', title: 'Introduction to Machine Learning', type: 'pdf', status: 'ready' },
@@ -35,25 +38,11 @@ function SourcesPanel() {
     { id: '4', title: 'Processing document...', type: 'pdf', status: 'processing' },
   ]);
   const [selectedSources, setSelectedSources] = useState(['1', '2']);
-  const [isLoading, setIsLoading] = useState(false);
+  // const [isLoading, setIsLoading] = useState(false); 
 
   // Placeholder handlers for future implementation
   const handleDeleteSource = (id) => {
     setSources(prev => prev.filter(s => s.id !== id));
-  };
-
-  const handleAddSource = () => {
-    setIsLoading(true);
-    // Simulated add - will be replaced with actual implementation
-    setTimeout(() => {
-      setSources(prev => [...prev, {
-        id: Date.now().toString(),
-        title: 'New Source',
-        type: 'pdf',
-        status: 'processing'
-      }]);
-      setIsLoading(false);
-    }, 1000);
   };
 
   const filteredSources = sources.filter(source =>
@@ -108,24 +97,14 @@ function SourcesPanel() {
       <div className="panel-header">
         <h2 className="panel-header__title">Sources</h2>
         <div className="panel-header__actions">
-          <Dropdown>
-            <DropdownTrigger>
-              <IconButton variant="ghost" size="sm" label="Add source">
-                <Plus size={18} />
-              </IconButton>
-            </DropdownTrigger>
-            <DropdownMenu>
-              <DropdownItem icon={<Upload size={16} />}>
-                Upload File
-              </DropdownItem>
-              <DropdownItem icon={<Link size={16} />}>
-                Add URL
-              </DropdownItem>
-              <DropdownItem icon={<FileText size={16} />}>
-                Create Note
-              </DropdownItem>
-            </DropdownMenu>
-          </Dropdown>
+          <IconButton
+            variant="ghost"
+            size="sm"
+            label="Add source"
+            onClick={() => openModal('upload')}
+          >
+            <Plus size={18} />
+          </IconButton>
         </div>
       </div>
 
@@ -144,7 +123,7 @@ function SourcesPanel() {
 
       {/* Selection info */}
       <div className="sources-panel__selection">
-        <button 
+        <button
           className="sources-panel__select-all"
           onClick={handleSelectAll}
         >
@@ -157,15 +136,9 @@ function SourcesPanel() {
 
       {/* Source list */}
       <div className="sources-panel__list panel-scrollable">
-        {isLoading ? (
-          <>
-            <SkeletonListItem />
-            <SkeletonListItem />
-            <SkeletonListItem />
-          </>
-        ) : filteredSources.length > 0 ? (
+        {filteredSources.length > 0 ? (
           filteredSources.map(source => (
-            <div 
+            <div
               key={source.id}
               className={`source-item ${selectedSources.includes(source.id) ? 'source-item--selected' : ''}`}
             >
@@ -212,14 +185,28 @@ function SourcesPanel() {
               variant="primary"
               size="sm"
               leftIcon={<Plus size={16} />}
-              onClick={handleAddSource}
+              onClick={() => openModal('upload')}
             >
               Add Source
             </Button>
           </div>
         )}
       </div>
+
+      {/* Modal */}
+      <AddSourceModal />
     </div>
+  );
+}
+
+/**
+ * Wrapper to provide context
+ */
+function SourcesPanel() {
+  return (
+    <AddSourceProvider>
+      <SourcesPanelContent />
+    </AddSourceProvider>
   );
 }
 

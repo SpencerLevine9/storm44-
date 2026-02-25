@@ -184,9 +184,9 @@
      ============================================ */
   
   --z-index-base: 0;
-  --z-index-dropdown: 100;
-  --z-index-sticky: 200;
-  --z-index-fixed: 300;
+  --z-index-sticky: 100;
+  --z-index-fixed: 200;
+  --z-index-dropdown: 300;
   --z-index-modal-backdrop: 400;
   --z-index-modal: 500;
   --z-index-popover: 600;
@@ -237,6 +237,15 @@
   --backdrop-blur-sm: blur(4px);
   --backdrop-blur-md: blur(8px);
   --backdrop-blur-lg: blur(16px);
+
+  /* Glassmorphism */
+  --glass-bg: rgba(255, 255, 255, 0.72);
+  --glass-border: rgba(255, 255, 255, 0.2);
+  --glass-blur: blur(20px);
+
+  /* Flashcard flip */
+  --flip-duration: 500ms;
+  --flip-perspective: 800px;
 }
 
 /* ============================================
@@ -296,4 +305,8 @@
   --shadow-elevated: 0 2px 8px rgba(0, 0, 0, 0.4);
   --shadow-floating: 0 8px 30px rgba(0, 0, 0, 0.5);
   --shadow-modal: 0 20px 60px rgba(0, 0, 0, 0.6);
+
+  /* Glassmorphism dark mode */
+  --glass-bg: rgba(28, 28, 30, 0.72);
+  --glass-border: rgba(255, 255, 255, 0.08);
 }

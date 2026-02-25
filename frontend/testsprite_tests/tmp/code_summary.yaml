@@ -1,0 +1,99 @@
+version: "2"
+type: frontend
+tech_stack:
+  - JavaScript
+  - React 19
+  - Vite 7
+  - Lucide React Icons
+routes:
+  - path: /
+    file: src/pages/WorkspacePage/WorkspacePage.jsx
+    auth_required: false
+    description: Main workspace page with 3-panel layout including header, sources, chat, and study tools
+features:
+  - name: Notebook Dropdown Selector
+    description: Dropdown in the header that lets users switch between notebooks, create new notebooks, inline rename notebooks, and delete notebooks
+    files:
+      - src/components/layout/Header/NotebookDropdown.jsx
+      - src/components/layout/Header/NotebookDropdown.css
+      - src/contexts/NotebookContext.jsx
+      - src/components/layout/Header/Header.jsx
+    entry_route: /
+    user_interactions:
+      - Click notebook name in header to open dropdown
+      - See list of notebooks with active notebook highlighted
+      - Click a notebook to switch to it
+      - Click pencil icon to start inline rename of a notebook
+      - Type new name and press Enter or click check to confirm rename
+      - Press Escape or click X to cancel rename
+      - Click trash icon to delete a notebook (only if more than 1 exists)
+      - Click "New Notebook" button at bottom of dropdown to create a new notebook
+    api_calls: []
+    auth_required: false
+  - name: Flashcard Deck List
+    description: Grid view of flashcard decks within the Flashcards tab of the Study Tools panel, scoped to the active notebook. Supports creating, renaming, and deleting decks.
+    files:
+      - src/features/study-tools/DeckList/DeckList.jsx
+      - src/features/study-tools/DeckList/DeckList.css
+      - src/features/study-tools/StudyToolsPanel/StudyToolsPanel.jsx
+      - src/contexts/FlashcardContext.jsx
+    entry_route: /
+    user_interactions:
+      - See empty state with "Create Deck" button when no decks exist
+      - Click "Create Deck" or "New Deck" button to create a new deck with inline rename
+      - Click a deck card to open the flashcard viewer for that deck
+      - Click pencil icon on a deck card to inline rename
+      - Click trash icon on a deck card to delete it
+      - See card count and last studied time on each deck card
+    api_calls: []
+    auth_required: false
+  - name: Flashcard Viewer with 3D Flip
+    description: Interactive flashcard study view with 3D card flip animation, progress bar, and previous/next navigation. Supports keyboard shortcuts.
+    files:
+      - src/features/study-tools/FlashcardViewer/FlashcardViewer.jsx
+      - src/features/study-tools/FlashcardViewer/FlashcardViewer.css
+      - src/contexts/FlashcardContext.jsx
+    entry_route: /
+    user_interactions:
+      - See deck title and card count in viewer header
+      - Click card or press Space/Enter to flip between front and back
+      - Click left/right arrows or press arrow keys to navigate between cards
+      - See progress bar showing position within deck
+      - Click back button to return to deck list
+      - Click "Add Card" button to open the add card form
+      - See empty state when deck has no cards
+    api_calls: []
+    auth_required: false
+  - name: Flashcard Form
+    description: Form to add new flashcards to a deck with front and back text fields
+    files:
+      - src/features/study-tools/FlashcardForm/FlashcardForm.jsx
+      - src/features/study-tools/FlashcardForm/FlashcardForm.css
+    entry_route: /
+    user_interactions:
+      - Fill in front text field with question or term
+      - Fill in back text field with answer or definition
+      - Click "Add Card" to save card and return to viewer
+      - Click "Add & Another" to save card and stay on form for another
+      - Click "Cancel" to discard and return to viewer
+      - Submit button is disabled when either field is empty
+    api_calls: []
+    auth_required: false
+  - name: Notebook and Flashcard Context Providers
+    description: React context providers wrapping the app that manage notebook and flashcard state (CRUD operations, active notebook tracking)
+    files:
+      - src/App.jsx
+      - src/contexts/NotebookContext.jsx
+      - src/contexts/FlashcardContext.jsx
+    entry_route: /
+    user_interactions:
+      - State is managed automatically as users interact with notebook and flashcard features
+    api_calls: []
+    auth_required: false
+known_limitations:
+  - issue: Notebook and flashcard data is stored in React state only, not persisted to localStorage or backend
+    location: src/contexts/NotebookContext.jsx, src/contexts/FlashcardContext.jsx
+    impact: All data is lost on page refresh
+  - issue: Quizzes and Game tabs in Study Tools are placeholder UI only
+    location: src/features/study-tools/StudyToolsPanel/StudyToolsPanel.jsx
+    impact: Generate Quiz and Start Game buttons have no functionality
