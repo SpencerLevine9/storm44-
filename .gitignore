@@ -19,6 +19,7 @@ venv/
 
 # Backend Data
 backend/data/
+backend/requirements.txt
 *.log
 
 # Testing
@@ -27,3 +28,7 @@ backend/data/
 
 # Temporary files
 tempPDFfolder/
+
+# Mac
+.DS_Store
+backend/.DS_Store
