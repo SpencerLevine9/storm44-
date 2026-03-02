@@ -96,13 +96,25 @@ def main():
         # keep metadata for citations later
         metas.append(
             {
-                "source_file": c.get("source_file"),
+                # Common PDF and YouTube
                 "chunk_id": c.get("chunk_id"),
+                "source_type": c.get("source_type"),   # "pdf" or "youtube"
+                "preview": text[:200],
+
+                # PDF specific (safe if missing)
+                "source_file": c.get("source_file"),
                 "start_page": c.get("start_page"),
                 "end_page": c.get("end_page"),
                 "approx_words": c.get("approx_words"),
-                # optional: store a preview (helps debugging)
-                "preview": text[:200],
+
+                # YouTube specific (safe if missing)
+                "title": c.get("title"),
+                "url": c.get("url"),
+                "video_id": c.get("video_id"),
+                "start_time": c.get("start_time"),
+                "end_time": c.get("end_time"),
+                "segment_start_idx": c.get("segment_start_idx"),
+                "segment_end_idx": c.get("segment_end_idx"),
             }
         )
         texts.append(text)
