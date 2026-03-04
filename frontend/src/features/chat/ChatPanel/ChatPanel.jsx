@@ -2,12 +2,11 @@ import { useState, useRef, useEffect } from 'react';
 import { Send, Zap, Copy, ThumbsUp, ThumbsDown } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import { chatCompletion } from '../../../utils/openai';
 import Button from '../../../components/ui/Button';
 import IconButton from '../../../components/ui/IconButton';
 import './ChatPanel.css';
 
-const OPENAI_API_KEY = import.meta.env.VITE_OPENAI_API_KEY;
-const OPENAI_API_URL = 'https://api.openai.com/v1/chat/completions';
 const SYSTEM_PROMPT =
   'You are a helpful AI study assistant. You must be brief and concise. ' +
   'Your responses must never exceed 10 sentences. Use markdown formatting when appropriate.';
@@ -77,30 +76,7 @@ function ChatPanel() {
     setIsLoading(true);
 
     try {
-      const response = await fetch(OPENAI_API_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${OPENAI_API_KEY}`,
-        },
-        body: JSON.stringify({
-          model: 'gpt-4o-mini',
-          messages: [
-            { role: 'system', content: SYSTEM_PROMPT },
-            { role: 'user', content: userMessage.content },
-          ],
-          max_tokens: 500,
-          temperature: 0.7,
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error?.message || `API error: ${response.status}`);
-      }
-
-      const data = await response.json();
-      const content = data.choices?.[0]?.message?.content || 'No response received.';
+      const content = await chatCompletion(SYSTEM_PROMPT, userMessage.content);
 
       setMessages((prev) => [
         ...prev,
