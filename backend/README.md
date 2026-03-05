@@ -11,7 +11,11 @@ This Backend will be responsible for:
 ## Current Status
 Backend File Path - Completed
 
-FastAPI server implementation - In Progress
+FastAPI server implementation - Running
+
+Schemas - Completed
+
+
 
 
 ## Current Structure
