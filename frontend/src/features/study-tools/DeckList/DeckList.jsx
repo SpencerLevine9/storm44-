@@ -1,8 +1,10 @@
 import { useState, useRef, useEffect } from 'react';
-import { Plus, Trash2, Pencil, BookOpen, Clock, Layers, Check, X } from 'lucide-react';
+import { Plus, Trash2, Pencil, BookOpen, Clock, Layers, Check, X, Zap } from 'lucide-react';
 import Button from '../../../components/ui/Button';
+import IconButton from '../../../components/ui/IconButton';
 import { useFlashcards } from '../../../contexts/FlashcardContext';
 import { useNotebooks } from '../../../contexts/NotebookContext';
+import AIDeckModal from '../AIDeckModal/AIDeckModal';
 import './DeckList.css';
 
 function DeckList({ onSelectDeck }) {
@@ -12,6 +14,7 @@ function DeckList({ onSelectDeck }) {
 
   const [editingId, setEditingId] = useState(null);
   const [editValue, setEditValue] = useState('');
+  const [isAIModalOpen, setIsAIModalOpen] = useState(false);
   const editRef = useRef(null);
 
   useEffect(() => {
@@ -72,14 +75,30 @@ function DeckList({ onSelectDeck }) {
         <p className="deck-list__empty-text">
           Create a deck to start adding flashcards.
         </p>
-        <Button
-          variant="primary"
-          size="sm"
-          leftIcon={<Plus size={16} />}
-          onClick={handleCreate}
-        >
-          Create Deck
-        </Button>
+        <div className="deck-list__button-group">
+          <Button
+            variant="primary"
+            size="sm"
+            leftIcon={<Plus size={16} />}
+            onClick={handleCreate}
+          >
+            Create Deck
+          </Button>
+          <IconButton
+            variant="primary"
+            size="sm"
+            label="Generate AI Deck"
+            onClick={() => setIsAIModalOpen(true)}
+          >
+            <Zap size={16} />
+          </IconButton>
+        </div>
+        <AIDeckModal
+          isOpen={isAIModalOpen}
+          onClose={() => setIsAIModalOpen(false)}
+          notebookId={activeNotebookId}
+          onDeckCreated={onSelectDeck}
+        />
       </div>
     );
   }
@@ -141,6 +160,12 @@ function DeckList({ onSelectDeck }) {
                 )}
               </div>
               <div className="deck-card__meta">
+                {deck.isAiGenerated && (
+                  <span className="deck-card__meta-item deck-card__meta-item--ai">
+                    <Zap size={12} />
+                    AI
+                  </span>
+                )}
                 <span className="deck-card__meta-item">
                   <Layers size={12} />
                   {cardCount} {cardCount === 1 ? 'card' : 'cards'}
@@ -155,15 +180,31 @@ function DeckList({ onSelectDeck }) {
         })}
       </div>
       <div className="deck-list__footer">
-        <Button
-          variant="secondary"
-          size="sm"
-          leftIcon={<Plus size={16} />}
-          onClick={handleCreate}
-        >
-          New Deck
-        </Button>
+        <div className="deck-list__button-group">
+          <Button
+            variant="secondary"
+            size="sm"
+            leftIcon={<Plus size={16} />}
+            onClick={handleCreate}
+          >
+            New Deck
+          </Button>
+          <IconButton
+            variant="secondary"
+            size="sm"
+            label="Generate AI Deck"
+            onClick={() => setIsAIModalOpen(true)}
+          >
+            <Zap size={16} />
+          </IconButton>
+        </div>
       </div>
+      <AIDeckModal
+        isOpen={isAIModalOpen}
+        onClose={() => setIsAIModalOpen(false)}
+        notebookId={activeNotebookId}
+        onDeckCreated={onSelectDeck}
+      />
     </div>
   );
 }

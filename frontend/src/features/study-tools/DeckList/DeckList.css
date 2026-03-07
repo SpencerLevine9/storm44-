@@ -157,6 +157,21 @@
   color: var(--color-text-tertiary);
 }
 
+.deck-card__meta-item--ai {
+  color: var(--color-primary);
+  font-weight: var(--font-weight-semibold);
+}
+
+/* ============================================
+   BUTTON GROUP (Create + AI side-by-side)
+   ============================================ */
+
+.deck-list__button-group {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+}
+
 /* ============================================
    INLINE EDIT
    ============================================ */
