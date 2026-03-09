@@ -1,31 +1,31 @@
-# this file is for the top k chunks
-
 from __future__ import annotations
 import json
 import os
+import re
 from pathlib import Path
 from typing import Any, Dict, List, Tuple
 import numpy as np
 
 MODEL_NAME = os.getenv("EMBED_MODEL", "sentence-transformers/all-MiniLM-L6-v2")
 
-REPO_ROOT = Path(__file__).resolve().parents[2]  # machine_learning/ingest_pipeline/store -> machine_learning
+REPO_ROOT = Path(__file__).resolve().parents[2]
 EMB_DIR = REPO_ROOT / "artifacts" / "embeddings"
 
 EMB_NPY = EMB_DIR / "embeddings.npy"
 META_JSONL = EMB_DIR / "chunks_index.jsonl"
-
-# Where your chunk text lives (so we can show the actual chunk content)
 CHUNKS_DIR = REPO_ROOT / "artifacts" / "chunks"
 
+STOPWORDS = {
+    "what", "is", "a", "an", "the", "in", "on", "of", "to", "and", "or",
+    "for", "with", "as", "by", "it", "this", "that", "are", "be", "from",
+    "does", "do", "how", "why", "when", "where",
+}
 
 def embed_query_local(query: str) -> np.ndarray:
     from sentence_transformers import SentenceTransformer
-
     model = SentenceTransformer(MODEL_NAME)
     v = model.encode([query], normalize_embeddings=True, convert_to_numpy=True)
     return v.astype(np.float32)[0]
-
 
 def load_index() -> Tuple[np.ndarray, List[Dict[str, Any]]]:
     if not EMB_NPY.exists():
@@ -53,10 +53,6 @@ def format_time(seconds: Any) -> str:
     return f"{minutes}:{secs:02d}"
 
 def find_chunk_text(meta: Dict[str, Any]) -> str:
-    """
-    Find the full chunk text by reading the correct chunk file and matching chunk_id.
-    Works for both PDF and YouTube chunks.
-    """
     source_type = meta.get("source_type")
     chunk_id = meta.get("chunk_id")
 
@@ -66,22 +62,17 @@ def find_chunk_text(meta: Dict[str, Any]) -> str:
     chunk_path = None
 
     if source_type == "youtube":
-        # Example chunk_id: Video_1_chunk_003 -> file Video_1_chunks.json
         chunk_id_str = str(chunk_id)
         if "_chunk_" not in chunk_id_str:
             return "[Invalid YouTube chunk_id format]"
         base = chunk_id_str.split("_chunk_")[0]
         chunk_path = CHUNKS_DIR / f"{base}_chunks.json"
-
     else:
-        # PDF path
-        # source_file example: Intro_CS_ch1.pdf -> Intro_CS_ch1_chunks.json
         source_file = meta.get("source_file")
         if source_file:
             base = Path(source_file).stem
             chunk_path = CHUNKS_DIR / f"{base}_chunks.json"
         else:
-            # fallback: try deriving from chunk_id if source_file is missing
             chunk_id_str = str(chunk_id)
             if "_chunk_" in chunk_id_str:
                 base = chunk_id_str.split("_chunk_")[0]
@@ -97,35 +88,145 @@ def find_chunk_text(meta: Dict[str, Any]) -> str:
 
     return "[Chunk id not found in chunk file]"
 
-def top_k(query: str, k: int = 5) -> List[Dict[str, Any]]:
+def query_keywords(query: str) -> List[str]:
+    return [
+        w.lower()
+        for w in re.findall(r"[a-zA-Z0-9_]+", query)
+        if len(w) > 2 and w.lower() not in STOPWORDS
+    ]
+
+def extract_target_phrase(query: str) -> str:
+    q = query.strip().lower()
+    patterns = [
+        r"^what is an? (.+?)\??$",
+        r"^what are (.+?)\??$",
+        r"^define (.+?)\??$",
+        r"^explain (.+?)\??$",
+    ]
+    for pat in patterns:
+        m = re.match(pat, q)
+        if m:
+            return m.group(1).strip()
+    return q
+
+def rerank_score(query: str, text: str, meta: Dict[str, Any], base_sim: float) -> float:
+    q = query.lower().strip()
+    t = text.lower()
+    keywords = query_keywords(query)
+    target = extract_target_phrase(query)
+
+    score = base_sim * 10.0
+
+    # keyword overlap
+    overlap = sum(1 for w in set(keywords) if w in t)
+    score += overlap * 1.2
+
+    # exact target phrase
+    if target and target in t:
+        score += 7.0
+
+    # penalize definition chunks that do NOT contain the exact target phrase
+    if (q.startswith("what is") or q.startswith("what are")) and target and target not in t:
+        score -= 4.0
+
+    # special penalty so "computer science" does not get confused with sibling fields
+    if target == "computer science":
+        if "information science" in t:
+            score -= 6.0
+        if "data science" in t:
+            score -= 6.0
+
+    # definitional bonus
+    definitional_patterns = [
+        " is a ",
+        " is an ",
+        " refers to ",
+        " means ",
+        " is defined as ",
+        " is used to ",
+    ]
+    if any(p in t for p in definitional_patterns):
+        score += 2.5
+
+    # strong preference for definition-style chunks on "what is" questions
+    if q.startswith("what is") or q.startswith("what are"):
+        if any(p in t for p in definitional_patterns):
+            score += 2.5
+
+    # prefer PDF slightly for clean definitions
+    if meta.get("source_type") == "pdf" and (q.startswith("what is") or q.startswith("what are")):
+        score += 2.5
+
+    # slight penalty for youtube on strict definition questions
+    if meta.get("source_type") == "youtube" and (q.startswith("what is") or q.startswith("what are")):
+        score -= 1.5
+
+    # simple file-aware boosts for your small course corpus
+    source_file = (meta.get("source_file") or "").lower()
+
+    if "python" in q and "python" in source_file:
+        score += 2.0
+
+    if any(term in q for term in ["computer science", "turing", "machine learning"]) and "cs" in source_file:
+        score += 2.0
+
+    if "for loop" in q and "python" in q and "python" in source_file:
+        score += 2.0
+
+    # penalize noisy transcript / textbook navigation language
+    noisy_patterns = [
+        r"what is up guys",
+        r"in this video",
+        r"chapter outline",
+        r"chapter summary",
+        r"learning objectives",
+        r"by the end of this section",
+        r"access for free at",
+        r"courtesy of",
+    ]
+    for pat in noisy_patterns:
+        if re.search(pat, t):
+            score -= 3.0
+
+    # slight penalty for extremely short or extremely long chunks
+    text_len = len(text.strip())
+    if text_len < 80:
+        score -= 1.0
+    elif text_len > 1200:
+        score -= 1.5
+
+    return score
+
+def top_k(query: str, k: int = 5, candidate_pool: int = 20) -> List[Dict[str, Any]]:
     emb, meta = load_index()
     qv = embed_query_local(query)
 
-    # Because both emb and qv are normalized, cosine sim = dot product
-    sims = emb @ qv  # shape: (N,)
-    idx = np.argsort(-sims)[:k]
+    sims = emb @ qv
+    candidate_idx = np.argsort(-sims)[:candidate_pool]
+
+    scored = []
+    for i in candidate_idx:
+        m = meta[int(i)]
+        text = find_chunk_text(m)
+        score = rerank_score(query, text, m, float(sims[int(i)]))
+        scored.append((score, float(sims[int(i)]), int(i), m, text))
+
+    scored.sort(key=lambda x: (-x[0], -x[1]))
 
     results = []
-    for rank, i in enumerate(idx, start=1):
-        m = meta[int(i)]
+    for rank, (_, sim, i, m, text) in enumerate(scored[:k], start=1):
         source_type = m.get("source_type")
-
         results.append(
             {
                 "rank": rank,
-                "score": float(sims[int(i)]),
-
-                # common
+                "score": sim,
+                "rerank_score": float(_),
                 "source_type": source_type,
                 "chunk_id": m.get("chunk_id"),
-                "text": find_chunk_text(m),
-
-                # PDF fields
+                "text": text,
                 "source_file": m.get("source_file"),
                 "start_page": m.get("start_page"),
                 "end_page": m.get("end_page"),
-
-                # YouTube fields
                 "title": m.get("title"),
                 "url": m.get("url"),
                 "video_id": m.get("video_id"),
@@ -134,35 +235,3 @@ def top_k(query: str, k: int = 5) -> List[Dict[str, Any]]:
             }
         )
     return results
-
-def main():
-    query = input("Question: ").strip()
-    if not query:
-        print("No query entered.")
-        return
-
-    results = top_k(query, k=5)
-
-    print("\nTop matches:\n")
-    for r in results:
-        if r["source_type"] == "youtube":
-            start_str = format_time(r.get("start_time"))
-            end_str = format_time(r.get("end_time"))
-            print(
-                f"[{r['rank']}] score={r['score']:.4f}  "
-                f"{r.get('title')}  chunk={r['chunk_id']}  "
-                f"time={start_str}-{end_str}"
-            )
-            print(f"URL: {r.get('url')}")
-        else:
-            print(
-                f"[{r['rank']}] score={r['score']:.4f}  "
-                f"{r.get('source_file')}  chunk={r['chunk_id']}  "
-                f"pages={r.get('start_page')}-{r.get('end_page')}"
-            )
-
-        print(r["text"][:800].replace("\n", " ") + ("..." if len(r["text"]) > 800 else ""))
-        print("-" * 80)
-
-if __name__ == "__main__":
-    main()
