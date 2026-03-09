@@ -1,11 +1,31 @@
 import json
 from pathlib import Path
 from typing import List, Dict, Any
+import re
 
 # Simple, explainable proxy for token limits
-MAX_CHARS = 1800
-MIN_CHARS = 400
+MAX_CHARS = 900
+MIN_CHARS = 250
+MAX_SEGMENTS = 7
 
+def clean_transcript_text(text: str) -> str:
+    text = text.strip()
+    lower = text.lower()
+
+    bad_patterns = [
+        r"^what is up guys\b",
+        r"^in this video\b",
+        r"^welcome back\b",
+        r"^let'?s get started\b",
+        r"^today we'?re going to\b",
+        r"^go ahead and\b",
+    ]
+
+    for pat in bad_patterns:
+        if re.search(pat, lower):
+            return ""
+
+    return text
 
 def read_jsonl(path: Path) -> List[Dict[str, Any]]:
     rows = []
@@ -40,18 +60,21 @@ def chunk_youtube(
     buffer = []
     buffer_len = 0
 
-    seg_start_idx = 0
+    seg_start_idx = None
     chunk_idx = 0
 
     for i, seg in enumerate(segments):
-        text = seg.get("text", "").strip()
+        text = clean_transcript_text(seg.get("text", ""))
         if not text:
             continue
+
+        if seg_start_idx is None:
+            seg_start_idx = i
 
         buffer.append(text)
         buffer_len += len(text)
 
-        if buffer_len >= MAX_CHARS:
+        if buffer_len >= MAX_CHARS or len(buffer) >= MAX_SEGMENTS:
             chunk_text = " ".join(buffer)
 
             start_time = segments[seg_start_idx].get("start")
@@ -73,10 +96,10 @@ def chunk_youtube(
                 "end_time": end_time
             })
 
+            seg_start_idx = None
             chunk_idx += 1
             buffer = []
             buffer_len = 0
-            seg_start_idx = i + 1
 
     # Flush remaining buffer
     if buffer:
