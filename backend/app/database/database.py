@@ -1,40 +1,75 @@
 """
 Database connection and schema setup for Storm44.
-Uses PostgreSQL; set DATABASE_URL in environment (e.g. postgresql://user:pass@localhost:5432/storm44).
-"""
 
+Connects to Azure PostgreSQL (or any Postgres) via DATABASE_URL.
+SSL is required for Azure; the connection string should include ?sslmode=require.
+
+Example DATABASE_URL:
+  postgresql://user:password@myserver.postgres.database.azure.com:5432/storm44?sslmode=require
+"""
 from __future__ import annotations
 
 import os
+from contextlib import contextmanager
 from pathlib import Path
+from typing import Generator
 
-# Optional: install psycopg2-binary for PostgreSQL
-try:
-    import psycopg2
-    from psycopg2.extensions import connection as PgConnection
-except ImportError:
-    psycopg2 = None
-    PgConnection = None
+import psycopg2
+import psycopg2.pool
+from psycopg2.extensions import connection as PgConnection
 
 _SCHEMA_PATH = Path(__file__).resolve().parent / "schema.sql"
 
+_pool: psycopg2.pool.ThreadedConnectionPool | None = None
+
 
 def get_database_url() -> str:
-    return os.getenv(
-        "DATABASE_URL",
-        "postgresql://localhost:5432/storm44",
-    )
+    url = os.getenv("DATABASE_URL")
+    if not url:
+        raise RuntimeError(
+            "DATABASE_URL is not set. "
+            "Example: postgresql://user:pass@host.postgres.database.azure.com:5432/storm44?sslmode=require"
+        )
+    return url
 
 
-def get_connection():
-    """Return a new PostgreSQL connection. Requires psycopg2 and a running Postgres with DATABASE_URL."""
-    if psycopg2 is None:
-        raise RuntimeError("Install psycopg2-binary to use the database (pip install psycopg2-binary).")
-    return psycopg2.connect(get_database_url())
+def _get_pool() -> psycopg2.pool.ThreadedConnectionPool:
+    global _pool
+    if _pool is None or _pool.closed:
+        _pool = psycopg2.pool.ThreadedConnectionPool(
+            minconn=1,
+            maxconn=int(os.getenv("DB_POOL_MAX", "10")),
+            dsn=get_database_url(),
+        )
+    return _pool
 
 
-def init_db(conn=None) -> None:
-    """Create user_account table (and any other tables in schema.sql). Idempotent."""
+def get_connection() -> PgConnection:
+    """Get a connection from the pool."""
+    return _get_pool().getconn()
+
+
+def put_connection(conn: PgConnection) -> None:
+    """Return a connection to the pool."""
+    pool = _get_pool()
+    pool.putconn(conn)
+
+
+@contextmanager
+def get_db() -> Generator[PgConnection, None, None]:
+    """Context manager that yields a connection and returns it to the pool."""
+    conn = get_connection()
+    try:
+        yield conn
+    except Exception:
+        conn.rollback()
+        raise
+    finally:
+        put_connection(conn)
+
+
+def init_db(conn: PgConnection | None = None) -> None:
+    """Run schema.sql to create all tables. Idempotent (IF NOT EXISTS)."""
     sql = _SCHEMA_PATH.read_text()
     own_conn = conn is None
     if own_conn:
@@ -44,14 +79,13 @@ def init_db(conn=None) -> None:
             cur.execute(sql)
         conn.commit()
     finally:
-        if own_conn and conn is not None and conn.closed == 0:
-            conn.close()
+        if own_conn:
+            put_connection(conn)
 
 
-def ensure_user_table() -> None:
-    """Convenience: open connection, run schema, close. Use at app startup if desired."""
-    conn = get_connection()
-    try:
-        init_db(conn=conn)
-    finally:
-        conn.close()
+def close_pool() -> None:
+    """Shut down the connection pool (call on app shutdown)."""
+    global _pool
+    if _pool is not None and not _pool.closed:
+        _pool.closeall()
+        _pool = None

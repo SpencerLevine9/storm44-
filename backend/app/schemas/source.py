@@ -87,3 +87,34 @@ class VideoSegmentCreate(BaseModel):
     start_time: float
     duration: Optional[float] = None
     seg_index: int
+
+
+class VideoSegmentInDB(BaseModel):
+    id: int
+    source_id: int
+    text: str
+    start_time: float
+    duration: Optional[float] = None
+    seg_index: int
+
+    model_config = {"from_attributes": True}
+
+
+# ── Embedding ─────────────────────────────────────────────────────
+
+class EmbeddingCreate(BaseModel):
+    """Payload for inserting an embedding row linked to a chunk."""
+    chunk_id: int
+    embedding: list[float]
+    embedding_model: str = Field(max_length=128)
+
+
+class EmbeddingInDB(BaseModel):
+    """Full embedding row as stored in Postgres."""
+    id: int
+    chunk_id: int
+    embedding: list[float]
+    embedding_model: str
+    created_at: datetime
+
+    model_config = {"from_attributes": True}
