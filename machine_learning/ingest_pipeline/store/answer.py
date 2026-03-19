@@ -4,7 +4,7 @@ import os
 from typing import Any, Dict, List
 
 from openai import OpenAI
-from retrieve import top_k
+from .retrieve import top_k
 
 MODEL_NAME = os.getenv("OPENAI_MODEL", "gpt-5-mini")
 
@@ -127,6 +127,34 @@ def answer_question(question: str, k: int = 3) -> str:
 
     return f"Answer:\n{answer}\n\nSources:\n{sources}"
 
+def answer_question_structured(question: str, k: int = 3) -> Dict[str, Any]:
+    results = top_k(question, k=k)
+
+# Backend version of answer_question().
+# Returns structured JSON-like data instead of one formatted string.
+
+    if not results:
+        return {
+            "answer": "I could not find any relevant sources.",
+            "sources": [],
+        }
+    context = build_context(results)
+    answer = generate_grounded_answer(question, context)
+
+    citations = []
+    for r in results:
+        citations.append({
+            "source_id": r.get("video_id") or r.get("source_file") or "unknown",
+            "chunk_id": str(r.get("chunk_id")) if r.get("chunk_id") is not None else None,
+            "snippet": (r.get("text") or "")[:180],
+            "start_seconds": r.get("start_time"),
+            "url": r.get("url"),
+        })
+
+    return {
+        "answer": answer,
+        "citations": citations,
+    }
 
 def main() -> None:
     q = input("Question: ").strip()
