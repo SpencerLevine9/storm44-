@@ -33,3 +33,10 @@ backend/
         main.py
     tests/
 ```
+
+## Requirements
+
+# Run backend
+
+source backend/.venv/bin/activate
+uvicorn backend.app.main:app --reload --port 8000
