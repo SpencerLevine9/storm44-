@@ -136,7 +136,7 @@ def answer_question_structured(question: str, k: int = 3) -> Dict[str, Any]:
     if not results:
         return {
             "answer": "I could not find any relevant sources.",
-            "sources": [],
+            "citations": [],
         }
     context = build_context(results)
     answer = generate_grounded_answer(question, context)

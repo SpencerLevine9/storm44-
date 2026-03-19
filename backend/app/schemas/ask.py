@@ -10,7 +10,7 @@ from pydantic import BaseModel, Field
 # Every citation tells us where the answer came from.
 
 class Citation(BaseModel):
-    source: str = Field(..., description="Which source this citation came from")
+    source_id: str = Field(..., description="Which source this citation came from")
     chunk_id: Optional[str] = Field(None, description="Optional Chunk Identifier")
     snippet: str = Field(..., description="Short text snippet shown to user")
     start_seconds: Optional[float] = Field(None, description="For YouTube sources, where to jump to")
