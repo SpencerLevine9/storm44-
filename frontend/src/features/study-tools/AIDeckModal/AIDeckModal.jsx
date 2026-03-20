@@ -1,11 +1,10 @@
 import { useState } from 'react';
-import { Minus, Plus, Loader2 } from 'lucide-react';
+import { Minus, Plus, Loader2, Zap } from 'lucide-react';
 import Modal from '../../../components/ui/Modal';
 import Button from '../../../components/ui/Button';
 import { useFlashcards } from '../../../contexts/FlashcardContext';
 import './AIDeckModal.css';
 
-const DIFFICULTIES = ['easy', 'medium', 'hard'];
 const MIN_CARDS = 5;
 const MAX_CARDS = 30;
 const DEFAULT_PROMPT = 'Flash cards should cover main and important material';
@@ -15,7 +14,6 @@ function AIDeckModal({ isOpen, onClose, notebookId, onDeckCreated }) {
 
   const [title, setTitle] = useState('');
   const [prompt, setPrompt] = useState(DEFAULT_PROMPT);
-  const [difficulty, setDifficulty] = useState('medium');
   const [count, setCount] = useState(10);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
@@ -38,7 +36,6 @@ function AIDeckModal({ isOpen, onClose, notebookId, onDeckCreated }) {
         notebookId,
         title.trim(),
         prompt.trim(),
-        difficulty,
         count,
       );
       onDeckCreated(deck.id);

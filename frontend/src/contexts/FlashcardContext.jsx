@@ -90,15 +90,15 @@ export function FlashcardProvider({ children }) {
   }, [cards]);
 
   // --- AI Deck Generation ---
-  const generateAIDeck = useCallback(async (notebookId, title, prompt, difficulty, count) => {
+  const generateAIDeck = useCallback(async (notebookId, title, prompt, count) => {
     const systemPrompt =
       'You are a flashcard generator. You must respond with valid JSON only. ' +
       'Return an object with a "cards" array. Each card has "front" (question) and "back" (answer) strings. ' +
-      `Generate exactly ${count} flashcards at ${difficulty} difficulty level.`;
+      `Generate exactly ${count} flashcards.`;
 
     const userPrompt =
       `Topic/Material: ${prompt}\n\n` +
-      `Create ${count} flashcards at ${difficulty} difficulty. ` +
+      `Create ${count} flashcards. ` +
       'Keep questions clear and answers concise.';
 
     const raw = await chatCompletion(systemPrompt, userPrompt, {
