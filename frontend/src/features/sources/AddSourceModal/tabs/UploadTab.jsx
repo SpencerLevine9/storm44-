@@ -2,9 +2,13 @@ import { useCallback, useState } from 'react';
 import { Upload, File, X, Check, AlertCircle } from 'lucide-react';
 import Button from '../../../../components/ui/Button';
 import { useAddSourceModal } from '../AddSourceContext';
+import { useSourcesContext } from '../../../../contexts/SourcesContext';
+import { useNotebooks } from '../../../../contexts/NotebookContext';
 
 export default function UploadTab() {
     const { uploadQueue, setUploadQueue } = useAddSourceModal();
+    const { addSource } = useSourcesContext();
+    const { activeNotebookId } = useNotebooks();
     const [isDragging, setIsDragging] = useState(false);
 
     // Mock upload simulation
@@ -26,9 +30,14 @@ export default function UploadTab() {
                 setUploadQueue(prev => prev.map(item =>
                     item.id === id ? { ...item, status: 'completed' } : item
                 ));
+                addSource(activeNotebookId, {
+                    title: file.name,
+                    type: 'pdf',
+                    fileName: file.name,
+                });
             }
         }, 200);
-    }, [setUploadQueue]);
+    }, [setUploadQueue, addSource, activeNotebookId]);
 
     const handleDrop = useCallback((e) => {
         e.preventDefault();

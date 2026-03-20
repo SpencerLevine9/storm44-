@@ -1,14 +1,14 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import {
   Plus,
-  Upload,
-  Link,
   FileText,
   Search,
   MoreVertical,
   File,
   Globe,
-  StickyNote
+  StickyNote,
+  Check,
+  X,
 } from 'lucide-react';
 import Button from '../../../components/ui/Button';
 import IconButton from '../../../components/ui/IconButton';
@@ -20,7 +20,8 @@ import {
   DropdownItem,
   DropdownSeparator,
 } from '../../../components/ui/Dropdown';
-import { SkeletonListItem } from '../../../components/ui/Skeleton';
+import { useSourcesContext } from '../../../contexts/SourcesContext';
+import { useNotebooks } from '../../../contexts/NotebookContext';
 import { AddSourceProvider, useAddSourceModal } from '../AddSourceModal/AddSourceContext';
 import AddSourceModal from '../AddSourceModal/AddSourceModal';
 import './SourcesPanel.css';
@@ -30,40 +31,42 @@ import './SourcesPanel.css';
  */
 function SourcesPanelContent() {
   const { openModal } = useAddSourceModal();
-  const [searchQuery, setSearchQuery] = useState('');
-  const [sources, setSources] = useState([
-    { id: '1', title: 'Introduction to Machine Learning', type: 'pdf', status: 'ready' },
-    { id: '2', title: 'Neural Networks Explained', type: 'url', status: 'ready' },
-    { id: '3', title: 'My Study Notes', type: 'note', status: 'ready' },
-    { id: '4', title: 'Processing document...', type: 'pdf', status: 'processing' },
-  ]);
-  const [selectedSources, setSelectedSources] = useState(['1', '2']);
-  // const [isLoading, setIsLoading] = useState(false); 
+  const { getSourcesForNotebook, removeSource, renameSource } = useSourcesContext();
+  const { activeNotebookId } = useNotebooks();
+  const sources = getSourcesForNotebook(activeNotebookId);
 
-  // Placeholder handlers for future implementation
-  const handleDeleteSource = (id) => {
-    setSources(prev => prev.filter(s => s.id !== id));
+  const [searchQuery, setSearchQuery] = useState('');
+  const [editingId, setEditingId] = useState(null);
+  const [editValue, setEditValue] = useState('');
+  const editRef = useRef(null);
+
+  useEffect(() => {
+    if (editingId && editRef.current) {
+      editRef.current.focus();
+      editRef.current.select();
+    }
+  }, [editingId]);
+
+  const startRename = (source) => {
+    setEditingId(source.id);
+    setEditValue(source.title);
+  };
+
+  const confirmRename = () => {
+    if (editValue.trim() && editingId) {
+      renameSource(editingId, editValue);
+    }
+    setEditingId(null);
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') confirmRename();
+    if (e.key === 'Escape') setEditingId(null);
   };
 
   const filteredSources = sources.filter(source =>
     source.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
-
-  const handleToggleSource = (id) => {
-    setSelectedSources(prev =>
-      prev.includes(id)
-        ? prev.filter(s => s !== id)
-        : [...prev, id]
-    );
-  };
-
-  const handleSelectAll = () => {
-    if (selectedSources.length === sources.length) {
-      setSelectedSources([]);
-    } else {
-      setSelectedSources(sources.map(s => s.id));
-    }
-  };
 
   const getSourceIcon = (type) => {
     switch (type) {
@@ -121,43 +124,40 @@ function SourcesPanelContent() {
         />
       </div>
 
-      {/* Selection info */}
-      <div className="sources-panel__selection">
-        <button
-          className="sources-panel__select-all"
-          onClick={handleSelectAll}
-        >
-          {selectedSources.length === sources.length ? 'Deselect all' : 'Select all'}
-        </button>
-        <span className="sources-panel__selected-count">
-          {selectedSources.length} selected
-        </span>
-      </div>
-
       {/* Source list */}
       <div className="sources-panel__list panel-scrollable">
         {filteredSources.length > 0 ? (
           filteredSources.map(source => (
-            <div
-              key={source.id}
-              className={`source-item ${selectedSources.includes(source.id) ? 'source-item--selected' : ''}`}
-            >
-              <label className="source-item__checkbox">
-                <input
-                  type="checkbox"
-                  checked={selectedSources.includes(source.id)}
-                  onChange={() => handleToggleSource(source.id)}
-                />
-                <span className="source-item__checkmark" />
-              </label>
+            <div key={source.id} className="source-item">
               <span className="source-item__icon">
                 {getSourceIcon(source.type)}
               </span>
               <div className="source-item__content">
-                <span className="source-item__title">{source.title}</span>
-                <span className={`source-item__status ${getStatusClass(source.status)}`}>
-                  {source.status}
-                </span>
+                {editingId === source.id ? (
+                  <div className="source-item__edit">
+                    <input
+                      ref={editRef}
+                      className="source-item__edit-input"
+                      value={editValue}
+                      onChange={e => setEditValue(e.target.value)}
+                      onKeyDown={handleKeyDown}
+                      onBlur={confirmRename}
+                    />
+                    <button className="source-item__edit-btn" onClick={confirmRename} type="button" aria-label="Confirm">
+                      <Check size={12} />
+                    </button>
+                    <button className="source-item__edit-btn" onMouseDown={e => { e.preventDefault(); setEditingId(null); }} type="button" aria-label="Cancel">
+                      <X size={12} />
+                    </button>
+                  </div>
+                ) : (
+                  <>
+                    <span className="source-item__title">{source.title}</span>
+                    <span className={`source-item__status ${getStatusClass(source.status)}`}>
+                      {source.status}
+                    </span>
+                  </>
+                )}
               </div>
               <Dropdown>
                 <DropdownTrigger>
@@ -167,9 +167,9 @@ function SourcesPanelContent() {
                 </DropdownTrigger>
                 <DropdownMenu align="end">
                   <DropdownItem>Preview</DropdownItem>
-                  <DropdownItem>Rename</DropdownItem>
+                  <DropdownItem onClick={() => startRename(source)}>Rename</DropdownItem>
                   <DropdownSeparator />
-                  <DropdownItem destructive onClick={() => handleDeleteSource(source.id)}>Delete</DropdownItem>
+                  <DropdownItem destructive onClick={() => removeSource(source.id)}>Delete</DropdownItem>
                 </DropdownMenu>
               </Dropdown>
             </div>

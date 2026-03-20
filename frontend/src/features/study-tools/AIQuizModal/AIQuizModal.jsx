@@ -2,15 +2,15 @@ import { useState } from 'react';
 import { Minus, Plus, Loader2, Zap } from 'lucide-react';
 import Modal from '../../../components/ui/Modal';
 import Button from '../../../components/ui/Button';
-import { useFlashcards } from '../../../contexts/FlashcardContext';
-import './AIDeckModal.css';
+import { useQuizzes } from '../../../contexts/QuizContext';
+import './AIQuizModal.css';
 
-const MIN_CARDS = 5;
-const MAX_CARDS = 30;
-const DEFAULT_PROMPT = 'Flash cards should cover main and important material';
+const MIN_QUESTIONS = 5;
+const MAX_QUESTIONS = 30;
+const DEFAULT_PROMPT = 'Quiz should cover main and important material';
 
-function AIDeckModal({ isOpen, onClose, notebookId, onDeckCreated }) {
-  const { generateAIDeck } = useFlashcards();
+function AIQuizModal({ isOpen, onClose, notebookId, onQuizCreated }) {
+  const { generateAIQuiz } = useQuizzes();
 
   const [title, setTitle] = useState('');
   const [prompt, setPrompt] = useState(DEFAULT_PROMPT);
@@ -21,7 +21,7 @@ function AIDeckModal({ isOpen, onClose, notebookId, onDeckCreated }) {
   const canSubmit = title.trim() && prompt.trim() && !isLoading;
 
   const handleCountChange = (delta) => {
-    setCount((prev) => Math.min(MAX_CARDS, Math.max(MIN_CARDS, prev + delta)));
+    setCount((prev) => Math.min(MAX_QUESTIONS, Math.max(MIN_QUESTIONS, prev + delta)));
   };
 
   const handleSubmit = async (e) => {
@@ -32,16 +32,16 @@ function AIDeckModal({ isOpen, onClose, notebookId, onDeckCreated }) {
     setError('');
 
     try {
-      const deck = await generateAIDeck(
+      const quiz = await generateAIQuiz(
         notebookId,
         title.trim(),
         prompt.trim(),
         count,
       );
-      onDeckCreated(deck.id);
+      onQuizCreated(quiz.id);
       handleClose();
     } catch (err) {
-      setError(err.message || 'Failed to generate deck. Please try again.');
+      setError(err.message || 'Failed to generate quiz. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -60,22 +60,22 @@ function AIDeckModal({ isOpen, onClose, notebookId, onDeckCreated }) {
     <Modal
       isOpen={isOpen}
       onClose={handleClose}
-      title="Generate AI Deck"
+      title="Generate AI Quiz"
       size="md"
       closeOnBackdrop={!isLoading}
       closeOnEscape={!isLoading}
     >
-      <form className="ai-deck-form" onSubmit={handleSubmit}>
-        {/* Deck Name */}
-        <div className="ai-deck-form__field">
-          <label className="ai-deck-form__label" htmlFor="ai-deck-title">
-            Deck Name
+      <form className="ai-quiz-form" onSubmit={handleSubmit}>
+        {/* Quiz Name */}
+        <div className="ai-quiz-form__field">
+          <label className="ai-quiz-form__label" htmlFor="ai-quiz-title">
+            Quiz Name
           </label>
           <input
-            id="ai-deck-title"
-            className="ai-deck-form__input"
+            id="ai-quiz-title"
+            className="ai-quiz-form__input"
             type="text"
-            placeholder="e.g. Biology Chapter 5"
+            placeholder="e.g. Biology Chapter 5 Quiz"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             disabled={isLoading}
@@ -84,42 +84,42 @@ function AIDeckModal({ isOpen, onClose, notebookId, onDeckCreated }) {
         </div>
 
         {/* Prompt */}
-        <div className="ai-deck-form__field">
-          <label className="ai-deck-form__label" htmlFor="ai-deck-prompt">
+        <div className="ai-quiz-form__field">
+          <label className="ai-quiz-form__label" htmlFor="ai-quiz-prompt">
             Additional Instructions
           </label>
           <textarea
-            id="ai-deck-prompt"
-            className="ai-deck-form__textarea"
+            id="ai-quiz-prompt"
+            className="ai-quiz-form__textarea"
             rows={3}
-            placeholder="Describe the material to generate flashcards from..."
+            placeholder="Describe the material to generate quiz questions from..."
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
             disabled={isLoading}
           />
         </div>
 
-        {/* Card Count */}
-        <div className="ai-deck-form__field">
-          <span className="ai-deck-form__label">
-            Number of Cards
+        {/* Question Count */}
+        <div className="ai-quiz-form__field">
+          <span className="ai-quiz-form__label">
+            Number of Questions
           </span>
-          <div className="ai-deck-form__stepper">
+          <div className="ai-quiz-form__stepper">
             <button
               type="button"
-              className="ai-deck-form__step-btn"
+              className="ai-quiz-form__step-btn"
               onClick={() => handleCountChange(-5)}
-              disabled={isLoading || count <= MIN_CARDS}
+              disabled={isLoading || count <= MIN_QUESTIONS}
               aria-label="Decrease count"
             >
               <Minus size={14} />
             </button>
-            <span className="ai-deck-form__step-value">{count}</span>
+            <span className="ai-quiz-form__step-value">{count}</span>
             <button
               type="button"
-              className="ai-deck-form__step-btn"
+              className="ai-quiz-form__step-btn"
               onClick={() => handleCountChange(5)}
-              disabled={isLoading || count >= MAX_CARDS}
+              disabled={isLoading || count >= MAX_QUESTIONS}
               aria-label="Increase count"
             >
               <Plus size={14} />
@@ -129,18 +129,18 @@ function AIDeckModal({ isOpen, onClose, notebookId, onDeckCreated }) {
 
         {/* Error */}
         {error && (
-          <p className="ai-deck-form__error">{error}</p>
+          <p className="ai-quiz-form__error">{error}</p>
         )}
 
         {/* Actions */}
-        <div className="ai-deck-form__actions">
+        <div className="ai-quiz-form__actions">
           <Button variant="ghost" size="sm" type="button" onClick={handleClose} disabled={isLoading}>
             Cancel
           </Button>
           <Button variant="primary" size="sm" type="submit" disabled={!canSubmit}>
             {isLoading ? (
               <>
-                <Loader2 size={16} className="ai-deck-form__spinner" />
+                <Loader2 size={16} className="ai-quiz-form__spinner" />
                 Generating...
               </>
             ) : (
@@ -153,4 +153,4 @@ function AIDeckModal({ isOpen, onClose, notebookId, onDeckCreated }) {
   );
 }
 
-export default AIDeckModal;
+export default AIQuizModal;

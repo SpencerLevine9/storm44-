@@ -1,18 +1,20 @@
 import { useState } from 'react';
-import { BookOpen, HelpCircle, Gamepad2, Sparkles, Maximize2, Minimize2 } from 'lucide-react';
+import { BookOpen, HelpCircle, Maximize2, Minimize2 } from 'lucide-react';
 import { Tabs, TabList, Tab, TabPanel } from '../../../components/ui/Tabs';
 import Button from '../../../components/ui/Button';
 import IconButton from '../../../components/ui/IconButton';
 import { useLayout } from '../../../components/layout/WorkspaceLayout/LayoutContext';
 import DeckList from '../DeckList/DeckList';
 import FlashcardViewer from '../FlashcardViewer/FlashcardViewer';
+import QuizList from '../QuizList/QuizList';
+import QuizViewer from '../QuizViewer/QuizViewer';
 import './StudyToolsPanel.css';
 
 // Storage key for persisting last selected tab
 const TAB_STORAGE_KEY = 'study-tools-tab';
 
 /**
- * Study Tools panel - right sidebar with tabs for Flashcards, Quizzes, Mini-game
+ * Study Tools panel - right sidebar with tabs for Flashcards and Quizzes
  */
 function StudyToolsPanel() {
   const {
@@ -27,18 +29,22 @@ function StudyToolsPanel() {
 
   const [activeTab, setActiveTab] = useState(() => {
     try {
-      return localStorage.getItem(TAB_STORAGE_KEY) || 'flashcards';
+      const stored = localStorage.getItem(TAB_STORAGE_KEY);
+      // If the stored tab was "game" (now removed), default to flashcards
+      return stored === 'game' ? 'flashcards' : (stored || 'flashcards');
     } catch {
       return 'flashcards';
     }
   });
 
-  // null = show deck list, string = show viewer for that deck
+  // null = show list, string = show viewer for that item
   const [activeDeckId, setActiveDeckId] = useState(null);
+  const [activeQuizId, setActiveQuizId] = useState(null);
 
   const handleTabChange = (value) => {
     setActiveTab(value);
-    setActiveDeckId(null); // Reset to deck list when switching tabs
+    setActiveDeckId(null);
+    setActiveQuizId(null);
     try {
       localStorage.setItem(TAB_STORAGE_KEY, value);
     } catch {
@@ -96,10 +102,6 @@ function StudyToolsPanel() {
               <HelpCircle size={16} />
               <span>Quizzes</span>
             </Tab>
-            <Tab value="game">
-              <Gamepad2 size={16} />
-              <span>Game</span>
-            </Tab>
           </TabList>
         </div>
 
@@ -120,44 +122,14 @@ function StudyToolsPanel() {
         {/* Quizzes Panel */}
         <TabPanel value="quizzes">
           <div className="study-tools-panel__content">
-            <div className="study-tools-empty">
-              <HelpCircle size={48} className="study-tools-empty__icon" />
-              <h3 className="study-tools-empty__title">No quizzes yet</h3>
-              <p className="study-tools-empty__text">
-                Generate quizzes from your selected sources to test your knowledge.
-              </p>
-              <div className="study-tools-empty__actions">
-                <Button
-                  variant="primary"
-                  size="sm"
-                  leftIcon={<Sparkles size={16} />}
-                >
-                  Generate Quiz
-                </Button>
-              </div>
-            </div>
-          </div>
-        </TabPanel>
-
-        {/* Game Panel */}
-        <TabPanel value="game">
-          <div className="study-tools-panel__content">
-            <div className="study-tools-empty">
-              <Gamepad2 size={48} className="study-tools-empty__icon" />
-              <h3 className="study-tools-empty__title">Match Terms</h3>
-              <p className="study-tools-empty__text">
-                Test your knowledge by matching terms with their definitions.
-              </p>
-              <div className="study-tools-empty__actions">
-                <Button
-                  variant="primary"
-                  size="sm"
-                  leftIcon={<Sparkles size={16} />}
-                >
-                  Start Game
-                </Button>
-              </div>
-            </div>
+            {activeQuizId ? (
+              <QuizViewer
+                quizId={activeQuizId}
+                onBack={() => setActiveQuizId(null)}
+              />
+            ) : (
+              <QuizList onSelectQuiz={setActiveQuizId} />
+            )}
           </div>
         </TabPanel>
       </Tabs>

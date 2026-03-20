@@ -1,8 +1,8 @@
 /* ============================================
-   AI DECK GENERATION MODAL
+   AI QUIZ GENERATION MODAL
    ============================================ */
 
-.ai-deck-form {
+.ai-quiz-form {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-4);
@@ -12,13 +12,13 @@
    FORM FIELDS
    ============================================ */
 
-.ai-deck-form__field {
+.ai-quiz-form__field {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-1);
 }
 
-.ai-deck-form__label {
+.ai-quiz-form__label {
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-semibold);
   text-transform: uppercase;
@@ -26,8 +26,8 @@
   color: var(--color-text-tertiary);
 }
 
-.ai-deck-form__input,
-.ai-deck-form__textarea {
+.ai-quiz-form__input,
+.ai-quiz-form__textarea {
   width: 100%;
   padding: var(--spacing-2) var(--spacing-3);
   font-family: var(--font-family-sans);
@@ -40,32 +40,32 @@
   transition: border-color 150ms ease;
 }
 
-.ai-deck-form__input:focus,
-.ai-deck-form__textarea:focus {
+.ai-quiz-form__input:focus,
+.ai-quiz-form__textarea:focus {
   border-color: var(--color-border-focus);
 }
 
-.ai-deck-form__input::placeholder,
-.ai-deck-form__textarea::placeholder {
+.ai-quiz-form__input::placeholder,
+.ai-quiz-form__textarea::placeholder {
   color: var(--color-text-placeholder);
 }
 
-.ai-deck-form__textarea {
+.ai-quiz-form__textarea {
   resize: vertical;
   min-height: 72px;
 }
 
 /* ============================================
-   CARD COUNT STEPPER
+   QUESTION COUNT STEPPER
    ============================================ */
 
-.ai-deck-form__stepper {
+.ai-quiz-form__stepper {
   display: flex;
   align-items: center;
   gap: var(--spacing-3);
 }
 
-.ai-deck-form__step-btn {
+.ai-quiz-form__step-btn {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -80,17 +80,17 @@
   transition: all 150ms ease;
 }
 
-.ai-deck-form__step-btn:hover:not(:disabled) {
+.ai-quiz-form__step-btn:hover:not(:disabled) {
   background-color: var(--color-bg-active);
   color: var(--color-text-primary);
 }
 
-.ai-deck-form__step-btn:disabled {
+.ai-quiz-form__step-btn:disabled {
   opacity: 0.4;
   cursor: not-allowed;
 }
 
-.ai-deck-form__step-value {
+.ai-quiz-form__step-value {
   min-width: 32px;
   font-size: var(--font-size-lg);
   font-weight: var(--font-weight-semibold);
@@ -102,7 +102,7 @@
    ERROR
    ============================================ */
 
-.ai-deck-form__error {
+.ai-quiz-form__error {
   margin: 0;
   padding: var(--spacing-2) var(--spacing-3);
   font-size: var(--font-size-sm);
@@ -115,7 +115,7 @@
    ACTIONS
    ============================================ */
 
-.ai-deck-form__actions {
+.ai-quiz-form__actions {
   display: flex;
   justify-content: flex-end;
   gap: var(--spacing-2);
@@ -126,11 +126,11 @@
    LOADING SPINNER
    ============================================ */
 
-.ai-deck-form__spinner {
-  animation: ai-deck-spin 1s linear infinite;
+.ai-quiz-form__spinner {
+  animation: ai-quiz-spin 1s linear infinite;
 }
 
-@keyframes ai-deck-spin {
+@keyframes ai-quiz-spin {
   from {
     transform: rotate(0deg);
   }
