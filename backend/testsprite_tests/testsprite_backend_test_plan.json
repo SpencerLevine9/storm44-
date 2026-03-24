@@ -1,0 +1,12 @@
+[
+  {
+    "id": "TC001",
+    "title": "get api v1 health returns service health status",
+    "description": "Test the GET /api/v1/health endpoint to verify it returns a 200 status with {\"status\":\"ok\"} when the service is healthy, and returns a 500 status with error details when the service is degraded."
+  },
+  {
+    "id": "TC002",
+    "title": "post api v1 ask returns rag generated answer with citations",
+    "description": "Test the POST /api/v1/ask endpoint with a valid query and top_k parameter to ensure it returns a 200 status with an answer string and a list of citations containing source_id, chunk_id, snippet, and optional start_seconds and url fields."
+  }
+]

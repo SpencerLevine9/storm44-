@@ -1,0 +1,86 @@
+version: "2"
+type: backend
+tech_stack:
+  - language: Python 3.14
+  - framework: FastAPI
+  - database: PostgreSQL with pgvector extension (asyncpg driver)
+  - other: Pydantic v2, Uvicorn, SentenceTransformers (MiniLM-L6-v2), OpenAI gpt-4o-mini
+features:
+  - name: Health Check
+    description: Simple liveness probe endpoint
+    files:
+      - app/api/v1/endpoints/health.py
+      - app/api/v1/router.py
+    endpoints:
+      - method: GET
+        path: /api/v1/health
+        description: Returns service health status
+        auth_required: false
+        response_schema:
+          "200":
+            status: string
+  - name: RAG Question Answering
+    description: Accepts a user question, retrieves top-k similar chunks from pgvector, and returns a GPT-generated answer with citations
+    files:
+      - app/api/v1/endpoints/ask.py
+      - app/schemas/ask.py
+      - app/db/crud.py
+    endpoints:
+      - method: POST
+        path: /api/v1/ask
+        description: Answer a question using RAG over ingested sources
+        auth_required: false
+        request_schema:
+          body:
+            query: string (min_length=1)
+            source_ids: list[string] (optional)
+            top_k: integer (1-20, default 5)
+        response_schema:
+          "200":
+            answer: string
+            citations:
+              - source_id: string
+                chunk_id: string (optional)
+                snippet: string
+                start_seconds: float (optional)
+                url: string (optional)
+          "500": Internal server error detail string
+  - name: Database Connection Pool
+    description: Async asyncpg connection pool with SSL support for Azure PostgreSQL, initialized on startup and closed on shutdown
+    files:
+      - app/db/database.py
+      - app/main.py
+    endpoints: []
+  - name: Source Ingestion DAL
+    description: Atomic transaction inserting a source, its chunks, and embeddings; rolls back on failure
+    files:
+      - app/db/crud.py
+    endpoints: []
+  - name: Vector Similarity Search DAL
+    description: Retrieves top-k chunks by cosine distance using pgvector <=> operator, scoped to provided source UUIDs
+    files:
+      - app/db/crud.py
+    endpoints: []
+  - name: Flashcard CRUD DAL
+    description: Bulk insert, retrieve, and delete flashcards per source
+    files:
+      - app/db/crud.py
+    endpoints: []
+  - name: Quiz Question CRUD DAL
+    description: Bulk insert, retrieve, and delete quiz questions per source
+    files:
+      - app/db/crud.py
+    endpoints: []
+known_limitations:
+  - issue: No dedicated /ingest endpoint — ingestion only available via crud.py DAL directly
+    location: app/api/v1/router.py
+    impact: Cannot trigger source ingestion via HTTP; pipeline runs separately
+  - issue: No dedicated /query or /flashcards/generate endpoints
+    location: app/api/v1/router.py
+    impact: TC_BE_002, TC_BE_003, TC_BE_004 test cases reference non-existent endpoints
+  - issue: No authentication or authorization on any endpoint
+    location: app/main.py
+    impact: All endpoints are publicly accessible
+  - issue: /api/v1/ask calls answer_question_structured which uses file-based embedding retrieval, not the DB DAL (retrieve_similar_chunks)
+    location: app/api/v1/endpoints/ask.py
+    impact: source_ids filter in AskRequest has no effect on retrieval
