@@ -1213,7 +1213,7 @@ body {
         </div>
         <div class="metadata-row">
           <div class="metadata-label text-body-medium">Date</div>
-          <div class="metadata-value text-body">3/23/2026</div>
+          <div class="metadata-value text-body">3/24/2026</div>
         </div>
         <div class="metadata-row">
           <div class="metadata-label text-body-medium">Prepared by</div>
@@ -1237,24 +1237,38 @@ body {
             <li><span class="coverage-highlight">0/0</span> of tests passed</li>
             <li><span class="coverage-highlight">Key gaps / risks:</span>
             
-              <h3>Fixed in this session</h3>
+              <h3>Issues fixed during this session</h3>
 <table>
 <thead>
 <tr>
 <th>Issue</th>
-<th>Severity</th>
-<th>Fix</th>
+<th>Fix Applied</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>retrieve.py</code> loads from <code>artifacts/</code> instead of <code>data/</code></td>
-<td><strong>Critical</strong></td>
-<td>Changed <code>REPO_ROOT / &quot;artifacts&quot;</code> → <code>REPO_ROOT / &quot;data&quot;</code> in retrieve.py</td>
+<td><code>retrieve.py</code> looked in <code>artifacts/</code> instead of <code>data/</code> for embeddings</td>
+<td>Changed path constants to <code>data/embeddings</code> and <code>data/chunks</code></td>
+</tr>
+<tr>
+<td>HNSW index returned global top-k before applying <code>source_id</code> WHERE filter — 0 results</td>
+<td>Used <code>WITH filtered AS MATERIALIZED (...)</code> CTE to force filter-first execution</td>
+</tr>
+<tr>
+<td>Scientific notation in vector literal (<code>1.2e-5</code>) rejected by pgvector</td>
+<td>Used <code>:.8f</code> fixed-point formatting for all vector components</td>
+</tr>
+<tr>
+<td><code>url: null</code> included in citation JSON, test expected string or absent field</td>
+<td>Added <code>response_model_exclude_none=True</code> to <code>/ask</code> route</td>
+</tr>
+<tr>
+<td><code>/ask</code> called file-based <code>top_k()</code> — <code>source_ids</code> was ignored</td>
+<td>Rewrote endpoint to use <code>retrieve_similar_chunks()</code> via pgvector DAL</td>
 </tr>
 </tbody>
 </table>
-<h3>Remaining gaps (not yet implemented)</h3>
+<h3>Remaining gaps (outside current scope)</h3>
 <table>
 <thead>
 <tr>
@@ -1267,41 +1281,30 @@ body {
 <tr>
 <td>No <code>/ingest</code> HTTP endpoint</td>
 <td>High</td>
-<td><code>crud.ingest_source()</code> exists but is not exposed via any API route. Ingestion only runs via the standalone ML pipeline script.</td>
-</tr>
-<tr>
-<td>No <code>/query</code> HTTP endpoint</td>
-<td>High</td>
-<td><code>crud.retrieve_similar_chunks()</code> exists but is not wired to any route. The <code>/ask</code> endpoint bypasses the DB and uses file-based retrieval instead.</td>
+<td><code>crud.ingest_source()</code> is complete but not exposed via API — ingestion runs as a standalone ML script</td>
 </tr>
 <tr>
 <td>No <code>/flashcards/generate</code> or <code>/quiz/generate</code> endpoints</td>
 <td>High</td>
-<td>CRUD functions in <code>crud.py</code> are complete but have no API surface.</td>
+<td><code>crud.save_flashcards()</code> and <code>crud.save_quiz_questions()</code> are complete but unwired</td>
 </tr>
 <tr>
-<td><code>/ask</code> endpoint ignores <code>source_ids</code></td>
+<td>No <code>/sources</code> endpoint</td>
 <td>Medium</td>
-<td><code>answer_question_structured()</code> uses file-based retrieval; the <code>source_ids</code> field in <code>AskRequest</code> has no effect.</td>
+<td>Frontend cannot list available sources to populate <code>source_ids</code>; test had to hardcode a UUID</td>
 </tr>
 <tr>
 <td>No authentication on any endpoint</td>
 <td>Medium</td>
-<td>All routes are publicly accessible — no auth middleware configured.</td>
+<td>All routes are publicly accessible</td>
 </tr>
 <tr>
-<td><code>source_ids</code> filter not plumbed to pgvector DAL</td>
-<td>Medium</td>
-<td><code>retrieve_similar_chunks()</code> accepts <code>source_ids</code> but the <code>/ask</code> route never calls it.</td>
+<td>SentenceTransformer model loads on first request (cold start ~3s)</td>
+<td>Low</td>
+<td>Model is loaded per-request from <code>embed_query_local()</code>; could be cached at startup</td>
 </tr>
 </tbody>
 </table>
-<h3>Next recommended actions</h3>
-<ol>
-<li>Restart backend and re-run TC002 to confirm the <code>artifacts/</code> → <code>data/</code> path fix resolves the 500.</li>
-<li>Wire <code>/ask</code> to <code>crud.retrieve_similar_chunks()</code> instead of file-based <code>top_k()</code>, so <code>source_ids</code> scoping and pgvector are actually used.</li>
-<li>Add <code>/ingest</code>, <code>/query</code>, <code>/flashcards/generate</code>, <code>/quiz/generate</code> routes to complete the backend API surface.</li>
-</ol>
 
             </li>
 </ul>
@@ -1326,7 +1329,7 @@ body {
           <div class="table-rows">
             
             <div class="table-row">
-              <div class="table-cell"><span class="text-body">REQ-01: Service Availability</span></div>
+              <div class="table-cell"><span class="text-body">REQ-01: Service Availability & Readiness</span></div>
               <div class="table-cell"><span class="text-body">0</span></div>
               <div class="table-cell"><span class="text-body">0</span></div>
               <div class="table-cell"><span class="text-body">0</span></div>
@@ -1334,7 +1337,7 @@ body {
         
 
             <div class="table-row">
-              <div class="table-cell"><span class="text-body">REQ-02: RAG Question Answering</span></div>
+              <div class="table-cell"><span class="text-body">REQ-02: RAG Question Answering via pgvector</span></div>
               <div class="table-cell"><span class="text-body">0</span></div>
               <div class="table-cell"><span class="text-body">0</span></div>
               <div class="table-cell"><span class="text-body">0</span></div>
@@ -1360,7 +1363,7 @@ body {
           <div class="accordion-header" onclick="toggleAccordion(this)">
             <div class="requirement-content">
                                           <div class="requirement-title-row">
-              <h3 class="title-requirement">REQ-01: Service Availability</h3>
+              <h3 class="title-requirement">REQ-01: Service Availability & Readiness</h3>
                 <div class="requirement-status-tag status-success">
               <svg width="18" height="18" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <circle cx="7.99961" cy="7.99998" r="6.4" fill="#10A363" fill-opacity="0.2"/>
@@ -1389,7 +1392,7 @@ body {
           <div class="accordion-header" onclick="toggleAccordion(this)">
             <div class="requirement-content">
                                           <div class="requirement-title-row">
-              <h3 class="title-requirement">REQ-02: RAG Question Answering</h3>
+              <h3 class="title-requirement">REQ-02: RAG Question Answering via pgvector</h3>
                 <div class="requirement-status-tag status-success">
               <svg width="18" height="18" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <circle cx="7.99961" cy="7.99998" r="6.4" fill="#10A363" fill-opacity="0.2"/>

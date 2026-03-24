@@ -5,7 +5,7 @@
 
 ## 1️⃣ Document Metadata
 - **Project Name:** storm44-
-- **Date:** 2026-03-23
+- **Date:** 2026-03-24
 - **Prepared by:** TestSprite AI Team
 
 ---
@@ -14,29 +14,22 @@
 
 #### Test TC001 get api v1 health returns service health status
 - **Test Code:** [TC001_get_api_v1_health_returns_service_health_status.py](./TC001_get_api_v1_health_returns_service_health_status.py)
-- **Test Visualization and Result:** https://www.testsprite.com/dashboard/mcp/tests/1ae20939-2788-4372-8632-a04ef06dd12a/0e4157d0-4a97-4700-97af-7d3432d7b0b1
+- **Test Visualization and Result:** https://www.testsprite.com/dashboard/mcp/tests/275b2cc4-776c-4738-a413-937e9d33364f/434b4d5e-08bd-4dff-927e-de3c35072007
 - **Status:** ✅ Passed
 - **Analysis / Findings:** {{TODO:AI_ANALYSIS}}.
 ---
 
 #### Test TC002 post api v1 ask returns rag generated answer with citations
 - **Test Code:** [TC002_post_api_v1_ask_returns_rag_generated_answer_with_citations.py](./TC002_post_api_v1_ask_returns_rag_generated_answer_with_citations.py)
-- **Test Error:** Traceback (most recent call last):
-  File "/var/task/handler.py", line 258, in run_with_retry
-    exec(code, exec_env)
-  File "<string>", line 50, in <module>
-  File "<string>", line 17, in test_post_api_v1_ask_returns_rag_generated_answer_with_citations
-AssertionError: Expected status code 200 but got 500 with response {"detail":"Missing /Users/marcuspetrov/Desktop/storm44-/machine_learning/artifacts/embeddings/embeddings.npy. Run embed.py first."}
-
-- **Test Visualization and Result:** https://www.testsprite.com/dashboard/mcp/tests/1ae20939-2788-4372-8632-a04ef06dd12a/8f311cd2-aa45-4ec1-ae4a-864fa8fe1673
-- **Status:** ❌ Failed
+- **Test Visualization and Result:** https://www.testsprite.com/dashboard/mcp/tests/275b2cc4-776c-4738-a413-937e9d33364f/6f11e63e-ec97-4e79-8c9f-b31f3f60a9cd
+- **Status:** ✅ Passed
 - **Analysis / Findings:** {{TODO:AI_ANALYSIS}}.
 ---
 
 
 ## 3️⃣ Coverage & Matching Metrics
 
-- **50.00** of tests passed
+- **100.00** of tests passed
 
 | Requirement        | Total Tests | ✅ Passed | ❌ Failed  |
 |--------------------|-------------|-----------|------------|

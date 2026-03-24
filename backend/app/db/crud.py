@@ -111,7 +111,7 @@ async def ingest_source(
 # ---------------------------------------------------------------------------
 
 async def retrieve_similar_chunks(
-    pool: asyncpg.Pool,
+    conn: asyncpg.Connection,
     query_embedding: list[float],
     source_ids: list[UUID],
     k: int = 5,
@@ -120,25 +120,43 @@ async def retrieve_similar_chunks(
     Return the top-k chunks most similar to query_embedding, restricted to
     the given source_ids. Uses pgvector cosine distance (<=>).
     """
-    vec_literal = f"[{','.join(str(v) for v in query_embedding)}]"
-    rows = await pool.fetch(
+    # Use fixed-point notation to avoid scientific notation in vector literal,
+    # which pgvector does not accept.
+    vec_literal = "[" + ",".join(f"{v:.8f}" for v in query_embedding) + "]"
+
+    # MATERIALIZED CTE forces PostgreSQL to fully evaluate the filter before
+    # computing distances. Without MATERIALIZED, the planner may fold the
+    # ORDER BY + LIMIT into the HNSW index scan, which returns global top-k
+    # candidates before applying the WHERE filter — causing empty results.
+    rows = await conn.fetch(
         """
+        WITH filtered AS MATERIALIZED (
+            SELECT
+                c.id          AS chunk_id,
+                c.source_id,
+                c.chunk_index,
+                c.text,
+                c.start_page,
+                c.end_page,
+                c.start_time,
+                c.end_time,
+                s.title       AS source_title,
+                s.source_type,
+                s.video_url,
+                s.video_id,
+                s.source_path,
+                e.embedding
+            FROM embedding e
+            JOIN chunk  c ON c.id = e.chunk_id
+            JOIN source s ON s.id = c.source_id
+            WHERE c.source_id = ANY($2::uuid[])
+        )
         SELECT
-            c.id          AS chunk_id,
-            c.source_id,
-            c.chunk_index,
-            c.text,
-            c.start_page,
-            c.end_page,
-            c.start_time,
-            c.end_time,
-            s.title       AS source_title,
-            s.source_type,
-            e.embedding <=> $1::vector AS distance
-        FROM embedding e
-        JOIN chunk  c ON c.id = e.chunk_id
-        JOIN source s ON s.id = c.source_id
-        WHERE c.source_id = ANY($2::uuid[])
+            chunk_id, source_id, chunk_index, text,
+            start_page, end_page, start_time, end_time,
+            source_title, source_type, video_url, video_id, source_path,
+            embedding <=> $1::vector AS distance
+        FROM filtered
         ORDER BY distance
         LIMIT $3
         """,
