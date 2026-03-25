@@ -21,7 +21,20 @@ export default function UrlTab() {
         }
     };
 
-    const handleSubmit = (e) => {
+    const isYouTubeUrl = (url) => /youtube\.com\/watch|youtu\.be\//.test(url);
+
+    const fetchYouTubeTitle = async (url) => {
+        try {
+            const res = await fetch(`/api/youtube-title?url=${encodeURIComponent(url)}`);
+            if (!res.ok) return null;
+            const data = await res.json();
+            return data.title || null;
+        } catch {
+            return null;
+        }
+    };
+
+    const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
 
@@ -31,17 +44,22 @@ export default function UrlTab() {
         }
 
         setIsSubmitting(true);
-        setTimeout(() => {
-            setIsSubmitting(false);
-            const hostname = new URL(urlValue).hostname;
-            addSource(activeNotebookId, {
-                title: hostname,
-                type: 'url',
-                url: urlValue,
-            });
-            setUrlValue('');
-            closeModal();
-        }, 1000);
+
+        let title = new URL(urlValue).hostname;
+
+        if (isYouTubeUrl(urlValue)) {
+            const ytTitle = await fetchYouTubeTitle(urlValue);
+            if (ytTitle) title = ytTitle;
+        }
+
+        addSource(activeNotebookId, {
+            title,
+            type: 'url',
+            url: urlValue,
+        });
+        setUrlValue('');
+        setIsSubmitting(false);
+        closeModal();
     };
 
     return (

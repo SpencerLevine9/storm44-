@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useCallback } from 'react';
 import { chatCompletion } from '../utils/openai';
+import { buildContext, wrapContextPrompt } from '../utils/contextBuilder';
 
 const QuizContext = createContext(null);
 
@@ -50,8 +51,14 @@ export function QuizProvider({ children }) {
   }, [questions]);
 
   // --- AI Quiz Generation ---
-  const generateAIQuiz = useCallback(async (notebookId, title, prompt, count) => {
+  const generateAIQuiz = useCallback(async (notebookId, title, prompt, count, { sources = [], onStatus } = {}) => {
+    const contextText = await buildContext(sources, onStatus);
+    const contextBlock = wrapContextPrompt(contextText);
+
+    onStatus?.('Generating content...');
+
     const systemPrompt =
+      contextBlock +
       'You are a quiz generator. You must respond with valid JSON only. ' +
       'Return an object with a "questions" array. Each question has: ' +
       '"question" (string), "options" (array of exactly 4 strings), ' +

@@ -28,7 +28,13 @@ export function SourcesProvider({ children }) {
   }, []);
 
   const removeSource = useCallback((sourceId) => {
-    setSources(prev => prev.filter(s => s.id !== sourceId));
+    setSources(prev => {
+      const source = prev.find(s => s.id === sourceId);
+      if (source?.type === 'pdf' && source.fileName) {
+        fetch(`/api/delete-pdf/${encodeURIComponent(source.fileName)}`, { method: 'DELETE' }).catch(() => {});
+      }
+      return prev.filter(s => s.id !== sourceId);
+    });
   }, []);
 
   const renameSource = useCallback((sourceId, newTitle) => {

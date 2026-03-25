@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useCallback } from 'react';
 import { chatCompletion } from '../utils/openai';
+import { buildContext, wrapContextPrompt } from '../utils/contextBuilder';
 
 const FlashcardContext = createContext(null);
 
@@ -90,8 +91,14 @@ export function FlashcardProvider({ children }) {
   }, [cards]);
 
   // --- AI Deck Generation ---
-  const generateAIDeck = useCallback(async (notebookId, title, prompt, count) => {
+  const generateAIDeck = useCallback(async (notebookId, title, prompt, count, { sources = [], onStatus } = {}) => {
+    const contextText = await buildContext(sources, onStatus);
+    const contextBlock = wrapContextPrompt(contextText);
+
+    onStatus?.('Generating content...');
+
     const systemPrompt =
+      contextBlock +
       'You are a flashcard generator. You must respond with valid JSON only. ' +
       'Return an object with a "cards" array. Each card has "front" (question) and "back" (answer) strings. ' +
       `Generate exactly ${count} flashcards.`;

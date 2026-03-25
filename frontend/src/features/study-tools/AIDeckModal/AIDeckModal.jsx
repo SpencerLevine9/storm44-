@@ -3,6 +3,7 @@ import { Minus, Plus, Loader2, Zap } from 'lucide-react';
 import Modal from '../../../components/ui/Modal';
 import Button from '../../../components/ui/Button';
 import { useFlashcards } from '../../../contexts/FlashcardContext';
+import { useSourcesContext } from '../../../contexts/SourcesContext';
 import './AIDeckModal.css';
 
 const MIN_CARDS = 5;
@@ -11,11 +12,13 @@ const DEFAULT_PROMPT = 'Flash cards should cover main and important material';
 
 function AIDeckModal({ isOpen, onClose, notebookId, onDeckCreated }) {
   const { generateAIDeck } = useFlashcards();
+  const { getSourcesForNotebook } = useSourcesContext();
 
   const [title, setTitle] = useState('');
   const [prompt, setPrompt] = useState(DEFAULT_PROMPT);
   const [count, setCount] = useState(10);
   const [isLoading, setIsLoading] = useState(false);
+  const [status, setStatus] = useState('');
   const [error, setError] = useState('');
 
   const canSubmit = title.trim() && prompt.trim() && !isLoading;
@@ -32,11 +35,13 @@ function AIDeckModal({ isOpen, onClose, notebookId, onDeckCreated }) {
     setError('');
 
     try {
+      const sources = getSourcesForNotebook(notebookId);
       const deck = await generateAIDeck(
         notebookId,
         title.trim(),
         prompt.trim(),
         count,
+        { sources, onStatus: setStatus },
       );
       onDeckCreated(deck.id);
       handleClose();
@@ -44,6 +49,7 @@ function AIDeckModal({ isOpen, onClose, notebookId, onDeckCreated }) {
       setError(err.message || 'Failed to generate deck. Please try again.');
     } finally {
       setIsLoading(false);
+      setStatus('');
     }
   };
 
@@ -53,6 +59,7 @@ function AIDeckModal({ isOpen, onClose, notebookId, onDeckCreated }) {
     setPrompt(DEFAULT_PROMPT);
     setCount(10);
     setError('');
+    setStatus('');
     onClose();
   };
 
@@ -141,7 +148,7 @@ function AIDeckModal({ isOpen, onClose, notebookId, onDeckCreated }) {
             {isLoading ? (
               <>
                 <Loader2 size={16} className="ai-deck-form__spinner" />
-                Generating...
+                {status || 'Generating...'}
               </>
             ) : (
               <><Zap size={16} /> Create With AI</>

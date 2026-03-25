@@ -11,32 +11,51 @@ export default function UploadTab() {
     const { activeNotebookId } = useNotebooks();
     const [isDragging, setIsDragging] = useState(false);
 
-    // Mock upload simulation
-    const simulateUpload = useCallback((file) => {
-        // Add to queue with 'uploading' status
+    const uploadFile = useCallback((file) => {
         const id = Math.random().toString(36).substr(2, 9);
         setUploadQueue(prev => [...prev, { id, file, status: 'uploading', progress: 0 }]);
 
-        // Simulate progress
-        let progress = 0;
-        const interval = setInterval(() => {
-            progress += 10;
-            setUploadQueue(prev => prev.map(item =>
-                item.id === id ? { ...item, progress: Math.min(progress, 100) } : item
-            ));
+        const formData = new FormData();
+        formData.append('file', file);
 
-            if (progress >= 100) {
-                clearInterval(interval);
+        const xhr = new XMLHttpRequest();
+
+        xhr.upload.addEventListener('progress', (e) => {
+            if (e.lengthComputable) {
+                const progress = Math.round((e.loaded / e.total) * 100);
                 setUploadQueue(prev => prev.map(item =>
-                    item.id === id ? { ...item, status: 'completed' } : item
+                    item.id === id ? { ...item, progress } : item
+                ));
+            }
+        });
+
+        xhr.addEventListener('load', () => {
+            if (xhr.status === 200) {
+                const result = JSON.parse(xhr.responseText);
+                setUploadQueue(prev => prev.map(item =>
+                    item.id === id ? { ...item, status: 'completed', progress: 100 } : item
                 ));
                 addSource(activeNotebookId, {
                     title: file.name,
                     type: 'pdf',
-                    fileName: file.name,
+                    fileName: result.filename,
+                    content: `/api/pdf-file/${encodeURIComponent(result.filename)}`,
                 });
+            } else {
+                setUploadQueue(prev => prev.map(item =>
+                    item.id === id ? { ...item, status: 'error' } : item
+                ));
             }
-        }, 200);
+        });
+
+        xhr.addEventListener('error', () => {
+            setUploadQueue(prev => prev.map(item =>
+                item.id === id ? { ...item, status: 'error' } : item
+            ));
+        });
+
+        xhr.open('POST', '/api/upload-pdf');
+        xhr.send(formData);
     }, [setUploadQueue, addSource, activeNotebookId]);
 
     const handleDrop = useCallback((e) => {
@@ -45,10 +64,10 @@ export default function UploadTab() {
 
         if (e.dataTransfer.files?.length) {
             Array.from(e.dataTransfer.files).forEach(file => {
-                simulateUpload(file);
+                uploadFile(file);
             });
         }
-    }, [simulateUpload]);
+    }, [uploadFile]);
 
     const handleDragOver = (e) => {
         e.preventDefault();
@@ -68,7 +87,7 @@ export default function UploadTab() {
         input.onchange = (e) => {
             if (e.target.files?.length) {
                 Array.from(e.target.files).forEach(file => {
-                    simulateUpload(file);
+                    uploadFile(file);
                 });
             }
         };

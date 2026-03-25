@@ -3,6 +3,7 @@ import { Minus, Plus, Loader2, Zap } from 'lucide-react';
 import Modal from '../../../components/ui/Modal';
 import Button from '../../../components/ui/Button';
 import { useQuizzes } from '../../../contexts/QuizContext';
+import { useSourcesContext } from '../../../contexts/SourcesContext';
 import './AIQuizModal.css';
 
 const MIN_QUESTIONS = 5;
@@ -11,11 +12,13 @@ const DEFAULT_PROMPT = 'Quiz should cover main and important material';
 
 function AIQuizModal({ isOpen, onClose, notebookId, onQuizCreated }) {
   const { generateAIQuiz } = useQuizzes();
+  const { getSourcesForNotebook } = useSourcesContext();
 
   const [title, setTitle] = useState('');
   const [prompt, setPrompt] = useState(DEFAULT_PROMPT);
   const [count, setCount] = useState(10);
   const [isLoading, setIsLoading] = useState(false);
+  const [status, setStatus] = useState('');
   const [error, setError] = useState('');
 
   const canSubmit = title.trim() && prompt.trim() && !isLoading;
@@ -32,11 +35,13 @@ function AIQuizModal({ isOpen, onClose, notebookId, onQuizCreated }) {
     setError('');
 
     try {
+      const sources = getSourcesForNotebook(notebookId);
       const quiz = await generateAIQuiz(
         notebookId,
         title.trim(),
         prompt.trim(),
         count,
+        { sources, onStatus: setStatus },
       );
       onQuizCreated(quiz.id);
       handleClose();
@@ -44,6 +49,7 @@ function AIQuizModal({ isOpen, onClose, notebookId, onQuizCreated }) {
       setError(err.message || 'Failed to generate quiz. Please try again.');
     } finally {
       setIsLoading(false);
+      setStatus('');
     }
   };
 
@@ -53,6 +59,7 @@ function AIQuizModal({ isOpen, onClose, notebookId, onQuizCreated }) {
     setPrompt(DEFAULT_PROMPT);
     setCount(10);
     setError('');
+    setStatus('');
     onClose();
   };
 
@@ -141,7 +148,7 @@ function AIQuizModal({ isOpen, onClose, notebookId, onQuizCreated }) {
             {isLoading ? (
               <>
                 <Loader2 size={16} className="ai-quiz-form__spinner" />
-                Generating...
+                {status || 'Generating...'}
               </>
             ) : (
               <><Zap size={16} /> Create With AI</>
