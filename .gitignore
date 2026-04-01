@@ -24,3 +24,6 @@ backend/data/
 # Testing
 .pytest_cache/
 .mypy_cache/
+
+# Temporary PDF folder
+tempPDFfolder/
