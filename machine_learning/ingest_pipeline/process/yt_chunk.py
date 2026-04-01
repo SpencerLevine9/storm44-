@@ -4,9 +4,9 @@ from typing import List, Dict, Any
 import re
 
 # Simple, explainable proxy for token limits
-MAX_CHARS = 900
-MIN_CHARS = 250
-MAX_SEGMENTS = 7
+MAX_CHARS = 650
+MIN_CHARS = 200
+MAX_SEGMENTS = 4
 
 def clean_transcript_text(text: str) -> str:
     text = text.strip()
