@@ -216,6 +216,39 @@ def _term_in_text(term: str, text: str) -> bool:
     return False
 
 
+def _count_term_occurrences(term: str, text: str) -> int:
+    term = _normalize_for_match(term)
+    text = _normalize_for_match(text)
+    if not term or not text:
+        return 0
+    return len(re.findall(rf"\b{re.escape(term)}s?\b", text))
+
+
+def _has_definition_sentence(term: str, text: str) -> bool:
+    term = _normalize_for_match(term)
+    if not term:
+        return False
+
+    sentences = re.split(r'(?<=[.!?])\s+', text)
+    definitional_patterns = [
+        r"\bis\b",
+        r"\bare\b",
+        r"\brefers to\b",
+        r"\bmeans\b",
+        r"\bis defined as\b",
+        r"\bcan be\b",
+    ]
+
+    for sent in sentences:
+        s = _normalize_for_match(sent)
+        if not re.search(rf"\b{re.escape(term)}s?\b", s):
+            continue
+        if any(re.search(pat, s) for pat in definitional_patterns):
+            return True
+
+    return False
+
+
 def has_enough_definition_support(question: str, results: List[Dict[str, Any]]) -> bool:
     searchable = " ".join(
         " ".join(
@@ -285,12 +318,12 @@ def strip_prompt_leadin(question: str) -> str:
 
     
 def has_enough_topic_support(question: str, results: List[Dict[str, Any]]) -> bool:
-    searchable = " ".join(
+    text_blob = " ".join((r.get("text") or "") for r in results[:2])
+    meta_blob = " ".join(
         " ".join(
             filter(
                 None,
                 [
-                    r.get("text") or "",
                     r.get("source_file") or "",
                     r.get("title") or "",
                 ],
@@ -300,25 +333,42 @@ def has_enough_topic_support(question: str, results: List[Dict[str, Any]]) -> bo
     )
 
     core_topic = strip_prompt_leadin(question)
-    terms = query_keywords(core_topic)
+    raw_terms = list(dict.fromkeys(query_keywords(core_topic)))
 
-    filler_terms = {
-        "tell", "talk", "about", "know", "describe", "explain",
-        "please", "thing", "things", "topic", "topics",
-        "python", "java", "javascript", "programming",
-    }
-    terms = [t for t in terms if t not in filler_terms]
-
-    unique_terms = list(set(terms))
-
-    # Strict demo guardrail:
-    # broad prompts with only one core term are too vague
-    # e.g. "tell me about cooking", "what do you know about the internet"
-    if len(unique_terms) < 2:
+    if not raw_terms:
         return False
 
-    matched = sum(1 for t in unique_terms if _term_in_text(t, searchable))
-    return matched >= 2
+    generic_context_terms = {"python", "java", "javascript", "programming"}
+    nongeneric_terms = [t for t in raw_terms if t not in generic_context_terms]
+    generic_terms = [t for t in raw_terms if t in generic_context_terms]
+
+    matched_nongeneric = [t for t in nongeneric_terms if _term_in_text(t, text_blob)]
+    matched_generic = [
+        t for t in generic_terms
+        if _term_in_text(t, text_blob) or _term_in_text(t, meta_blob)
+    ]
+
+    # Case 1: single-topic broad prompt like "tell me about python"
+    if len(raw_terms) == 1:
+        term = raw_terms[0]
+        in_text = _term_in_text(term, text_blob)
+        in_meta = _term_in_text(term, meta_blob)
+        occurrences = _count_term_occurrences(term, text_blob)
+        has_definition = _has_definition_sentence(term, text_blob)
+
+        return (in_text or in_meta) and (occurrences >= 2 or has_definition)
+
+    # Case 2: scoped academic prompt like "tell me about expressions in python"
+    # Allow one real concept term if the course-context term is grounded by source metadata.
+    if len(matched_nongeneric) >= 2:
+        return True
+
+    if len(matched_nongeneric) == 1:
+        concept = matched_nongeneric[0]
+        if matched_generic or _has_definition_sentence(concept, text_blob):
+            return True
+
+    return False
 
 
 
