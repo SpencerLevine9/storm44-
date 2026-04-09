@@ -21,10 +21,19 @@ STOPWORDS = {
     "does", "do", "how", "why", "when", "where",
 }
 
+_CHUNK_FILE_CACHE: Dict[str, List[Dict[str, Any]]] = {}
+
+# Cache the embedding model instance to avoid reloading it on every query
+# implemented this for Data usage / processing minimization
+_MODEL_CACHE = None
+
 def embed_query_local(query: str) -> np.ndarray:
-    from sentence_transformers import SentenceTransformer
-    model = SentenceTransformer(MODEL_NAME)
-    v = model.encode([query], normalize_embeddings=True, convert_to_numpy=True)
+    global _MODEL_CACHE
+    if _MODEL_CACHE is None:
+        from sentence_transformers import SentenceTransformer
+        _MODEL_CACHE = SentenceTransformer(MODEL_NAME)
+
+    v = _MODEL_CACHE.encode([query], normalize_embeddings=True, convert_to_numpy=True)
     return v.astype(np.float32)[0]
 
 def load_index() -> Tuple[np.ndarray, List[Dict[str, Any]]]:
@@ -81,7 +90,13 @@ def find_chunk_text(meta: Dict[str, Any]) -> str:
     if chunk_path is None or not chunk_path.exists():
         return "[Chunk text file not found]"
 
-    data = json.loads(chunk_path.read_text(encoding="utf-8"))
+# Implement a simple in-memory cache to avoid re-reading the same chunk file multiple times
+# implemented this for Data usage / processing minimization and speedup on repeated queries that hit the same chunks
+    cache_key = str(chunk_path)
+    if cache_key not in _CHUNK_FILE_CACHE:
+        _CHUNK_FILE_CACHE[cache_key] = json.loads(chunk_path.read_text(encoding="utf-8"))
+    data = _CHUNK_FILE_CACHE[cache_key]
+
     for c in data:
         if str(c.get("chunk_id")) == str(chunk_id):
             return (c.get("text") or "").strip()
