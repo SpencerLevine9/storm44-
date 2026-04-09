@@ -5,11 +5,12 @@ import re
 from dataclasses import dataclass
 from pathlib import Path
 from typing import List, Dict, Any, Tuple
+from ftfy import fix_text
 
 # Smaller chunks = better retrieval for concept questions
-CHUNK_WORDS = 140
-OVERLAP_WORDS = 30
-MIN_CHUNK_WORDS = 40
+CHUNK_WORDS = 100
+OVERLAP_WORDS = 20
+MIN_CHUNK_WORDS = 35
 
 TEXT_DIR = Path("machine_learning/artifacts/text")
 OUT_DIR = Path("machine_learning/artifacts/chunks")
@@ -24,7 +25,29 @@ class Page:
 
 
 def read_text_file(path: Path) -> str:
-    return path.read_text(encoding="utf-8", errors="ignore")
+    raw = path.read_text(encoding="utf-8", errors="ignore")
+    return repair_text_encoding(raw)
+
+
+def repair_text_encoding(text: str) -> str:
+    text = fix_text(text)
+
+    replacements = {
+        "â€“": "–",
+        "â€”": "—",
+        "â€˜": "‘",
+        "â€™": "’",
+        "â€œ": "“",
+        "â€": "”",
+        "Â ": " ",
+        "Â": "",
+        "\ufeff": "",
+    }
+
+    for bad, good in replacements.items():
+        text = text.replace(bad, good)
+
+    return text
 
 
 def split_into_pages(raw: str) -> List[Page]:
@@ -89,6 +112,16 @@ def clean_pdf_text(text: str) -> str:
         r"^key terms\b",
         r"^exercise\b",
         r"^summary\b$",
+        r"^by the end of this section",
+        r"^access multimedia content",
+        r"^link to learning",
+        r"^chapter review",
+        r"^try it\b",
+        r"^recommended spacing",
+        r"^automatic concatenation",
+        r"^function description",
+        r"^operator description",
+        r"^syntax description",
     ]
 
     for line in lines:
@@ -103,6 +136,14 @@ def clean_pdf_text(text: str) -> str:
 
         # Skip lines that are mostly decorative / separators
         if re.fullmatch(r"[-_=•* ]{3,}", s):
+            continue
+
+        # Skip very short heading-like lines
+        if len(s.split()) <= 3 and s == s.title():
+            continue
+
+        # Skip lines that are mostly symbols/numbers
+        if len(re.findall(r"[A-Za-z]", s)) < 3:
             continue
 
         cleaned.append(s)

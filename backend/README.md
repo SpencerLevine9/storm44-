@@ -11,7 +11,11 @@ This Backend will be responsible for:
 ## Current Status
 Backend File Path - Completed
 
-FastAPI server implementation - In Progress
+FastAPI server implementation - Running
+
+Schemas - Completed
+
+
 
 
 ## Current Structure
@@ -29,3 +33,10 @@ backend/
         main.py
     tests/
 ```
+
+## Requirements
+
+# Run backend
+
+source backend/.venv/bin/activate
+uvicorn backend.app.main:app --reload --port 8000

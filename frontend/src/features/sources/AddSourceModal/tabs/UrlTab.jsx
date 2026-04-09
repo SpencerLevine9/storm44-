@@ -2,9 +2,13 @@ import { useState } from 'react';
 import Button from '../../../../components/ui/Button';
 import Input from '../../../../components/ui/Input';
 import { useAddSourceModal } from '../AddSourceContext';
+import { useSourcesContext } from '../../../../contexts/SourcesContext';
+import { useNotebooks } from '../../../../contexts/NotebookContext';
 
 export default function UrlTab() {
     const { urlValue, setUrlValue, closeModal } = useAddSourceModal();
+    const { addSource } = useSourcesContext();
+    const { activeNotebookId } = useNotebooks();
     const [error, setError] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -17,7 +21,20 @@ export default function UrlTab() {
         }
     };
 
-    const handleSubmit = (e) => {
+    const isYouTubeUrl = (url) => /youtube\.com\/watch|youtu\.be\//.test(url);
+
+    const fetchYouTubeTitle = async (url) => {
+        try {
+            const res = await fetch(`/api/youtube-title?url=${encodeURIComponent(url)}`);
+            if (!res.ok) return null;
+            const data = await res.json();
+            return data.title || null;
+        } catch {
+            return null;
+        }
+    };
+
+    const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
 
@@ -27,17 +44,22 @@ export default function UrlTab() {
         }
 
         setIsSubmitting(true);
-        // Simulate API call
-        setTimeout(() => {
-            setIsSubmitting(false);
-            // Trigger success logic (e.g. toast, refresh sources)
-            // For now we just close or show success.
-            // Ideally we should call a method passed from SourcesPanel or global store to add the source.
-            // We'll assume the context might handle it or we just close for now in this demo.
-            console.log("Added URL:", urlValue);
-            setUrlValue(''); // clear
-            closeModal();
-        }, 1000);
+
+        let title = new URL(urlValue).hostname;
+
+        if (isYouTubeUrl(urlValue)) {
+            const ytTitle = await fetchYouTubeTitle(urlValue);
+            if (ytTitle) title = ytTitle;
+        }
+
+        addSource(activeNotebookId, {
+            title,
+            type: 'url',
+            url: urlValue,
+        });
+        setUrlValue('');
+        setIsSubmitting(false);
+        closeModal();
     };
 
     return (

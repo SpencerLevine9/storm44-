@@ -6,6 +6,11 @@ import Button from '../../../components/ui/Button';
 import IconButton from '../../../components/ui/IconButton';
 import './ChatPanel.css';
 
+// Backend API (local development)
+const BACKEND_API_URL = import.meta.env.VITE_BACKEND_API_URL || 'http://127.0.0.1:8000';
+
+
+// May have to delete later
 const OPENAI_API_KEY = import.meta.env.VITE_OPENAI_API_KEY;
 const OPENAI_API_URL = 'https://api.openai.com/v1/chat/completions';
 const SYSTEM_PROMPT =
@@ -62,69 +67,76 @@ function ChatPanel() {
   };
 
   const handleSend = async () => {
-    if (!inputValue.trim() || isLoading) return;
+  if (!inputValue.trim() || isLoading) return;
 
-    const userMessage = {
-      id: Date.now().toString(),
-      role: 'user',
-      content: inputValue.trim(),
-      timestamp: new Date().toISOString(),
-    };
-
-    setMessages((prev) => [...prev, userMessage]);
-    setInputValue('');
-    resetTextareaHeight();
-    setIsLoading(true);
-
-    try {
-      const response = await fetch(OPENAI_API_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${OPENAI_API_KEY}`,
-        },
-        body: JSON.stringify({
-          model: 'gpt-4o-mini',
-          messages: [
-            { role: 'system', content: SYSTEM_PROMPT },
-            { role: 'user', content: userMessage.content },
-          ],
-          max_tokens: 500,
-          temperature: 0.7,
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error?.message || `API error: ${response.status}`);
-      }
-
-      const data = await response.json();
-      const content = data.choices?.[0]?.message?.content || 'No response received.';
-
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: (Date.now() + 1).toString(),
-          role: 'assistant',
-          content,
-          timestamp: new Date().toISOString(),
-        },
-      ]);
-    } catch (error) {
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: (Date.now() + 1).toString(),
-          role: 'assistant',
-          content: `**Error:** ${error.message || 'Failed to get a response. Please check your API key and try again.'}`,
-          timestamp: new Date().toISOString(),
-        },
-      ]);
-    } finally {
-      setIsLoading(false);
-    }
+  const userMessage = {
+    id: Date.now().toString(),
+    role: 'user',
+    content: inputValue.trim(),
+    timestamp: new Date().toISOString(),
   };
+
+  setMessages((prev) => [...prev, userMessage]);
+  setInputValue('');
+  resetTextareaHeight();
+  setIsLoading(true);
+
+  try {
+    // Calls our backend
+    const response = await fetch(`${BACKEND_API_URL}/api/v1/ask`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+       // Match the AskRequest schema in the backend
+      body: JSON.stringify({
+        query: userMessage.content,
+        source_ids: [], // later: pass selected sources from UI
+        top_k: 5,       // later: allow UI to control this
+      }),
+    });
+
+    // If backend returns an error (422 validation, 500, etc.), show it nicely
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      const msg = errorData?.detail
+        ? JSON.stringify(errorData.detail)
+        : errorData?.message;
+
+      throw new Error(msg || `Backend error: ${response.status}`);
+    }
+
+    // Backend returns AskResponse with { answer: string, citations: Source[] }
+    const data = await response.json();
+    const content = data?.answer || 'No response received.';
+
+    setMessages((prev) => [
+      ...prev,
+      {
+        id: (Date.now() + 1).toString(),
+        role: 'assistant',
+        content,
+        timestamp: new Date().toISOString(),
+        citations: data?.citations || [],
+      },
+    ]);
+  } catch (error) {
+    setMessages((prev) => [
+      ...prev,
+      {
+        id: (Date.now() + 1).toString(),
+        role: 'assistant',
+        content: `**Error:** ${
+          error?.message || 'Failed to get a response. Is the backend running on port 8000?'
+        }`,
+        timestamp: new Date().toISOString(),
+      },
+    ]);
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   const handleKeyDown = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {

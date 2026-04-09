@@ -90,9 +90,39 @@ def main():
 
     for c in chunks:
         text = (c.get("text") or "").strip()
+        lower = text.lower()
+
         if not text:
             continue
 
+        if len(text.split()) < 25:
+            continue
+
+        bad_patterns = [    # added more patterns for citation quality 
+            "access multimedia content",
+            "link to learning",
+            "review questions",
+            "multiple choice",
+            "true or false",
+            "fill in the blank",
+            "chapter review",
+            "chapter summary",
+            "exploring further",
+            "concepts in practice",
+            "exercise",
+            "key terms",
+            "try it",
+            "which comment is",
+            "where should a blank line",
+            "to temporarily prevent a line",
+            "what type of error",
+            "which would be a good name",
+            "final score",
+        ]
+
+        if any(pat in lower for pat in bad_patterns):
+            continue
+        
         # keep metadata for citations later
         metas.append(
             {

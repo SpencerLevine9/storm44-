@@ -1,0 +1,140 @@
+/* ============================================
+   AI QUIZ GENERATION MODAL
+   ============================================ */
+
+.ai-quiz-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+}
+
+/* ============================================
+   FORM FIELDS
+   ============================================ */
+
+.ai-quiz-form__field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+}
+
+.ai-quiz-form__label {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wide);
+  color: var(--color-text-tertiary);
+}
+
+.ai-quiz-form__input,
+.ai-quiz-form__textarea {
+  width: 100%;
+  padding: var(--spacing-2) var(--spacing-3);
+  font-family: var(--font-family-sans);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-primary);
+  background-color: var(--color-bg-primary);
+  border: var(--border-width-thin) solid var(--color-border-primary);
+  border-radius: var(--radius-md);
+  outline: none;
+  transition: border-color 150ms ease;
+}
+
+.ai-quiz-form__input:focus,
+.ai-quiz-form__textarea:focus {
+  border-color: var(--color-border-focus);
+}
+
+.ai-quiz-form__input::placeholder,
+.ai-quiz-form__textarea::placeholder {
+  color: var(--color-text-placeholder);
+}
+
+.ai-quiz-form__textarea {
+  resize: vertical;
+  min-height: 72px;
+}
+
+/* ============================================
+   QUESTION COUNT STEPPER
+   ============================================ */
+
+.ai-quiz-form__stepper {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+}
+
+.ai-quiz-form__step-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  background-color: var(--color-bg-secondary);
+  border: var(--border-width-thin) solid var(--color-border-primary);
+  border-radius: var(--radius-md);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all 150ms ease;
+}
+
+.ai-quiz-form__step-btn:hover:not(:disabled) {
+  background-color: var(--color-bg-active);
+  color: var(--color-text-primary);
+}
+
+.ai-quiz-form__step-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.ai-quiz-form__step-value {
+  min-width: 32px;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  text-align: center;
+}
+
+/* ============================================
+   ERROR
+   ============================================ */
+
+.ai-quiz-form__error {
+  margin: 0;
+  padding: var(--spacing-2) var(--spacing-3);
+  font-size: var(--font-size-sm);
+  color: var(--color-error);
+  background-color: var(--color-error-light);
+  border-radius: var(--radius-md);
+}
+
+/* ============================================
+   ACTIONS
+   ============================================ */
+
+.ai-quiz-form__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacing-2);
+  padding-top: var(--spacing-2);
+}
+
+/* ============================================
+   LOADING SPINNER
+   ============================================ */
+
+.ai-quiz-form__spinner {
+  animation: ai-quiz-spin 1s linear infinite;
+}
+
+@keyframes ai-quiz-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}

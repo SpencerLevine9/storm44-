@@ -1,14 +1,14 @@
 /* ============================================
-   DECK LIST
+   QUIZ LIST
    ============================================ */
 
-.deck-list {
+.quiz-list {
   display: flex;
   flex-direction: column;
   height: 100%;
 }
 
-.deck-list__grid {
+.quiz-list__grid {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-3);
@@ -16,7 +16,7 @@
   overflow-y: auto;
 }
 
-.deck-list__footer {
+.quiz-list__footer {
   padding-top: var(--spacing-3);
   border-top: var(--border-width-thin) solid var(--color-border-primary);
   margin-top: var(--spacing-3);
@@ -26,7 +26,7 @@
    EMPTY STATE
    ============================================ */
 
-.deck-list__empty {
+.quiz-list__empty {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -36,19 +36,19 @@
   min-height: 300px;
 }
 
-.deck-list__empty-icon {
+.quiz-list__empty-icon {
   color: var(--color-text-placeholder);
   margin-bottom: var(--spacing-4);
 }
 
-.deck-list__empty-title {
+.quiz-list__empty-title {
   font-size: var(--font-size-lg);
   font-weight: var(--font-weight-semibold);
   color: var(--color-text-primary);
   margin: 0 0 var(--spacing-2);
 }
 
-.deck-list__empty-text {
+.quiz-list__empty-text {
   font-size: var(--font-size-sm);
   color: var(--color-text-tertiary);
   margin: 0 0 var(--spacing-5);
@@ -56,10 +56,10 @@
 }
 
 /* ============================================
-   DECK CARD
+   QUIZ CARD
    ============================================ */
 
-.deck-card {
+.quiz-card {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-2);
@@ -71,24 +71,24 @@
   transition: all 200ms ease;
 }
 
-.deck-card:hover {
+.quiz-card:hover {
   border-color: var(--color-border-secondary);
   box-shadow: var(--shadow-sm);
 }
 
-.deck-card:focus-visible {
+.quiz-card:focus-visible {
   outline: none;
   box-shadow: var(--shadow-focus-ring);
 }
 
-.deck-card__header {
+.quiz-card__header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: var(--spacing-2);
 }
 
-.deck-card__title {
+.quiz-card__title {
   flex: 1;
   min-width: 0;
   font-size: var(--font-size-base);
@@ -100,21 +100,21 @@
 }
 
 /* ============================================
-   DECK CARD ACTIONS (hover reveal)
+   QUIZ CARD ACTIONS (hover reveal)
    ============================================ */
 
-.deck-card__actions {
+.quiz-card__actions {
   display: flex;
   gap: var(--spacing-1);
   opacity: 0;
   transition: opacity 150ms ease;
 }
 
-.deck-card:hover .deck-card__actions {
+.quiz-card:hover .quiz-card__actions {
   opacity: 1;
 }
 
-.deck-card__action-btn {
+.quiz-card__action-btn {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -129,27 +129,27 @@
   transition: var(--transition-all);
 }
 
-.deck-card__action-btn:hover {
+.quiz-card__action-btn:hover {
   background-color: var(--color-bg-active);
   color: var(--color-text-primary);
 }
 
-.deck-card__action-btn--danger:hover {
+.quiz-card__action-btn--danger:hover {
   background-color: var(--color-error-light);
   color: var(--color-error);
 }
 
 /* ============================================
-   DECK CARD META
+   QUIZ CARD META
    ============================================ */
 
-.deck-card__meta {
+.quiz-card__meta {
   display: flex;
   align-items: center;
   gap: var(--spacing-3);
 }
 
-.deck-card__meta-item {
+.quiz-card__meta-item {
   display: flex;
   align-items: center;
   gap: var(--spacing-1);
@@ -157,61 +157,17 @@
   color: var(--color-text-tertiary);
 }
 
-.deck-card__meta-item--ai {
+.quiz-card__meta-item--ai {
   color: var(--color-primary);
   font-weight: var(--font-weight-semibold);
 }
 
 /* ============================================
-   BUTTON GROUP (Create + AI side-by-side)
+   BUTTON GROUP
    ============================================ */
 
-.deck-list__button-group {
+.quiz-list__button-group {
   display: flex;
   align-items: center;
   gap: var(--spacing-2);
-}
-
-/* ============================================
-   INLINE EDIT
-   ============================================ */
-
-.deck-card__edit {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-1);
-  width: 100%;
-}
-
-.deck-card__edit-input {
-  flex: 1;
-  min-width: 0;
-  padding: var(--spacing-1) var(--spacing-2);
-  font-size: var(--font-size-sm);
-  font-family: inherit;
-  color: var(--color-text-primary);
-  background-color: var(--color-bg-primary);
-  border: var(--border-width-thin) solid var(--color-border-focus);
-  border-radius: var(--radius-sm);
-  box-shadow: var(--shadow-focus-ring);
-  outline: none;
-}
-
-.deck-card__edit-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 22px;
-  height: 22px;
-  padding: 0;
-  background: none;
-  border: none;
-  border-radius: var(--radius-sm);
-  color: var(--color-text-tertiary);
-  cursor: pointer;
-}
-
-.deck-card__edit-btn:hover {
-  background-color: var(--color-bg-active);
-  color: var(--color-text-primary);
 }

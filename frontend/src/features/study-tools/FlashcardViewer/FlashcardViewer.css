@@ -68,6 +68,8 @@
 
 .flashcard-viewer__scene {
   width: 100%;
+  max-width: 500px;
+  margin: 0 auto;
   aspect-ratio: 4 / 3;
   perspective: 800px;
   cursor: pointer;

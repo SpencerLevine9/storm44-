@@ -1,4 +1,6 @@
 import { createContext, useContext, useState, useCallback } from 'react';
+import { chatCompletion } from '../utils/openai';
+import { buildContext, wrapContextPrompt } from '../utils/contextBuilder';
 
 const FlashcardContext = createContext(null);
 
@@ -17,13 +19,14 @@ export function FlashcardProvider({ children }) {
   const [cards, setCards] = useState([]);
 
   // --- Deck CRUD ---
-  const createDeck = useCallback((notebookId, title = 'Untitled Deck') => {
+  const createDeck = useCallback((notebookId, title = 'Untitled Deck', { isAiGenerated = false } = {}) => {
     const newDeck = {
       id: generateDeckId(),
       notebookId,
       title,
       createdAt: new Date().toISOString(),
       lastStudiedAt: null,
+      isAiGenerated,
     };
     setDecks(prev => [...prev, newDeck]);
     return newDeck;
@@ -87,6 +90,48 @@ export function FlashcardProvider({ children }) {
     return cards.filter(c => c.deckId === deckId).length;
   }, [cards]);
 
+  // --- AI Deck Generation ---
+  const generateAIDeck = useCallback(async (notebookId, title, prompt, count, { sources = [], onStatus } = {}) => {
+    const contextText = await buildContext(sources, onStatus);
+    const contextBlock = wrapContextPrompt(contextText);
+
+    onStatus?.('Generating content...');
+
+    const systemPrompt =
+      contextBlock +
+      'You are a flashcard generator. You must respond with valid JSON only. ' +
+      'Return an object with a "cards" array. Each card has "front" (question) and "back" (answer) strings. ' +
+      `Generate exactly ${count} flashcards.`;
+
+    const userPrompt =
+      `Topic/Material: ${prompt}\n\n` +
+      `Create ${count} flashcards. ` +
+      'Keep questions clear and answers concise.';
+
+    const raw = await chatCompletion(systemPrompt, userPrompt, {
+      maxTokens: count * 100,
+      temperature: 0.7,
+      json: true,
+    });
+
+    const parsed = JSON.parse(raw);
+    const flashcards = parsed.cards || parsed.flashcards || [];
+
+    const deck = createDeck(notebookId, title, { isAiGenerated: true });
+
+    const newCards = flashcards.slice(0, count).map((card, i) => ({
+      id: generateCardId(),
+      deckId: deck.id,
+      front: card.front || '',
+      back: card.back || '',
+      position: i,
+      createdAt: new Date().toISOString(),
+    }));
+
+    setCards(prev => [...prev, ...newCards]);
+    return deck;
+  }, [createDeck]);
+
   return (
     <FlashcardContext.Provider value={{
       decks,
@@ -101,6 +146,7 @@ export function FlashcardProvider({ children }) {
       deleteCard,
       getCardsForDeck,
       getCardCount,
+      generateAIDeck,
     }}>
       {children}
     </FlashcardContext.Provider>
