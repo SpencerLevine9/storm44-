@@ -9,6 +9,13 @@ import re
 
 MODEL_NAME = os.getenv("OPENAI_MODEL", "gpt-5-mini")
 
+MAX_CONTEXT_RESULTS = 2
+MAX_CHARS_PER_CHUNK = 500
+
+REFUSAL_MESSAGE = (
+    "I can only answer questions grounded in the uploaded materials. "
+    "Try asking about topics like computational thinking, Python, computer science, or machine learning."
+)
 
 def format_time(seconds: Any) -> str:
     if seconds is None:
@@ -48,11 +55,25 @@ def build_sources(results: List[Dict[str, Any]]) -> str:
         out.append(line)
     return "\n".join(out)
 
+# reduces the amount of retrieved material sent into the final answer model while keeping the top evidence.
+# implmented this for Data usage / processing minimization and speedup on repeated queries that hit the same chunks, and to improve answer quality by only including the most relevant sources in the context.
+def trim_chunk_text(text: str, max_chars: int = MAX_CHARS_PER_CHUNK) -> str:
+    text = (text or "").strip()
+    if len(text) <= max_chars:
+        return text
+
+    trimmed = text[:max_chars]
+    last_period = trimmed.rfind(". ")
+    if last_period > 150:
+        return trimmed[:last_period + 1].strip()
+
+    return trimmed.rstrip() + "..."
+
 
 def build_context(results: List[Dict[str, Any]]) -> str:
     chunks = []
 
-    for i, r in enumerate(results, start=1):
+    for i, r in enumerate(results[:MAX_CONTEXT_RESULTS], start=1):
         if r.get("source_type") == "youtube":
             source_label = (
                 f"Source {i} | YouTube | "
@@ -66,7 +87,7 @@ def build_context(results: List[Dict[str, Any]]) -> str:
                 f"pages {r.get('start_page')}-{r.get('end_page')}"
             )
 
-        text = (r.get("text") or "").strip()
+        text = trim_chunk_text(r.get("text") or "")
         chunks.append(f"{source_label}\n{text}")
 
     return "\n\n" + ("\n\n".join(chunks))
@@ -111,7 +132,7 @@ Study Context:
     answer = (response.output_text or "").strip()
 
     if not answer:
-        return "I could not generate an answer from the retrieved sources."
+        return REFUSAL_MESSAGE
 
     return answer
 
@@ -136,9 +157,10 @@ def answer_question_structured(question: str, k: int = 3) -> Dict[str, Any]:
 
     if not results:
         return {
-            "answer": "I could not find any relevant sources.",
+            "answer": REFUSAL_MESSAGE,
             "citations": [],
         }
+    
     context = build_context(results)
     answer = generate_grounded_answer(question, context)
 
@@ -381,7 +403,7 @@ def answer_question_structured(question: str, k: int = 3) -> Dict[str, Any]:
 
     if not results:
         return {
-            "answer": "I could not find any relevant sources.",
+            "answer": REFUSAL_MESSAGE,
             "citations": [],
         }
 
@@ -394,19 +416,19 @@ def answer_question_structured(question: str, k: int = 3) -> Dict[str, Any]:
 
     if best_rerank < 8.5:
         return {
-            "answer": "I do not have enough strong support in the uploaded material to answer that confidently.",
+            "answer": REFUSAL_MESSAGE,
             "citations": [],
         }
 
     if is_definition_style_question(q_lower) and not has_definition_support:
         return {
-            "answer": "I do not have enough strong support in the uploaded material to answer that confidently.",
+            "answer": REFUSAL_MESSAGE,
             "citations": [],
         }
 
     if is_broad_topic_prompt(q_lower) and not has_topic_support:
         return {
-            "answer": "I do not have enough strong support in the uploaded material to answer that confidently.",
+            "answer": REFUSAL_MESSAGE,
             "citations": [],
         }
     
