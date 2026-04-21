@@ -55,6 +55,8 @@ function FlashcardViewer({ deckId, onBack }) {
   useEffect(() => {
     const handleKey = (e) => {
       if (showAddForm) return;
+      const isInputFocused = e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable;
+      if (isInputFocused) return;
       if (e.key === 'ArrowRight') goNext();
       if (e.key === 'ArrowLeft') goPrev();
       if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); flip(); }
