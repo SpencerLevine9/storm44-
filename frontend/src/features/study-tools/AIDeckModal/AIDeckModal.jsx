@@ -144,15 +144,14 @@ function AIDeckModal({ isOpen, onClose, notebookId, onDeckCreated }) {
           <Button variant="ghost" size="sm" type="button" onClick={handleClose} disabled={isLoading}>
             Cancel
           </Button>
-          <Button variant="primary" size="sm" type="submit" disabled={!canSubmit}>
-            {isLoading ? (
-              <>
-                <Loader2 size={16} className="ai-deck-form__spinner" />
-                {status || 'Generating...'}
-              </>
-            ) : (
-              <><Zap size={16} /> Create With AI</>
-            )}
+          <Button
+            variant="primary"
+            size="sm"
+            type="submit"
+            disabled={!canSubmit}
+            leftIcon={isLoading ? <Loader2 size={16} className="ai-deck-form__spinner" /> : <Zap size={16} />}
+          >
+            {isLoading ? (status || 'Generating...') : 'Create With AI'}
           </Button>
         </div>
       </form>
