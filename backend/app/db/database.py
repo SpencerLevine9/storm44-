@@ -35,8 +35,6 @@ def _build_ssl_context(dsn: str) -> ssl.SSLContext | None:
     sslmode = params.get("sslmode", ["disable"])[0]
     if sslmode == "require":
         ctx = ssl.create_default_context()
-        ctx.check_hostname = False
-        ctx.verify_mode = ssl.CERT_NONE
         return ctx
     return None
 

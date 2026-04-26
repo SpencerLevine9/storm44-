@@ -1,5 +1,6 @@
 import os
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from dotenv import load_dotenv
 from fastapi import FastAPI
@@ -11,6 +12,8 @@ from app.database.database import close_pool, get_db, init_db  # noqa: E402
 from app.api.v1.router import api_router
 
 FRONTEND_ORIGIN = os.getenv("FRONTEND_ORIGIN", "http://localhost:5173")
+
+load_dotenv(Path(__file__).parent.parent / ".env")
 
 
 @asynccontextmanager
