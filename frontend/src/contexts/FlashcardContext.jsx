@@ -1,7 +1,6 @@
 import { createContext, useContext, useState, useCallback } from 'react';
-import { chatCompletion } from '../utils/openai';
-import { buildContext, wrapContextPrompt } from '../utils/contextBuilder';
 
+const BACKEND_API_URL = import.meta.env.VITE_BACKEND_API_URL || 'http://127.0.0.1:8000';
 const FlashcardContext = createContext(null);
 
 let nextDeckId = 1;
@@ -92,30 +91,33 @@ export function FlashcardProvider({ children }) {
 
   // --- AI Deck Generation ---
   const generateAIDeck = useCallback(async (notebookId, title, prompt, count, { sources = [], onStatus } = {}) => {
-    const contextText = await buildContext(sources, onStatus);
-    const contextBlock = wrapContextPrompt(contextText);
+    onStatus?.('Generating flashcards...');
 
-    onStatus?.('Generating content...');
+    const sourceIds = sources.map((source) => source.id).filter(Boolean);
 
-    const systemPrompt =
-      contextBlock +
-      'You are a flashcard generator. You must respond with valid JSON only. ' +
-      'Return an object with a "cards" array. Each card has "front" (question) and "back" (answer) strings. ' +
-      `Generate exactly ${count} flashcards.`;
-
-    const userPrompt =
-      `Topic/Material: ${prompt}\n\n` +
-      `Create ${count} flashcards. ` +
-      'Keep questions clear and answers concise.';
-
-    const raw = await chatCompletion(systemPrompt, userPrompt, {
-      maxTokens: count * 100,
-      temperature: 0.7,
-      json: true,
+    const response = await fetch(`${BACKEND_API_URL}/api/v1/flashcards`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        topic: prompt,
+        source_ids: sourceIds,
+        count,
+      }),
     });
 
-    const parsed = JSON.parse(raw);
-    const flashcards = parsed.cards || parsed.flashcards || [];
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      const msg = errorData?.detail
+        ? JSON.stringify(errorData.detail)
+        : errorData?.message;
+
+      throw new Error(msg || `Backend error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    const flashcards = data?.cards || [];
 
     const deck = createDeck(notebookId, title, { isAiGenerated: true });
 
@@ -128,26 +130,28 @@ export function FlashcardProvider({ children }) {
       createdAt: new Date().toISOString(),
     }));
 
-    setCards(prev => [...prev, ...newCards]);
+    setCards((prev) => [...prev, ...newCards]);
     return deck;
   }, [createDeck]);
 
   return (
-    <FlashcardContext.Provider value={{
-      decks,
-      cards,
-      createDeck,
-      renameDeck,
-      deleteDeck,
-      getDecksForNotebook,
-      touchDeckStudied,
-      addCard,
-      updateCard,
-      deleteCard,
-      getCardsForDeck,
-      getCardCount,
-      generateAIDeck,
-    }}>
+    <FlashcardContext.Provider
+      value={{
+        decks,
+        cards,
+        createDeck,
+        renameDeck,
+        deleteDeck,
+        getDecksForNotebook,
+        touchDeckStudied,
+        addCard,
+        updateCard,
+        deleteCard,
+        getCardsForDeck,
+        getCardCount,
+        generateAIDeck,
+      }}
+    >
       {children}
     </FlashcardContext.Provider>
   );

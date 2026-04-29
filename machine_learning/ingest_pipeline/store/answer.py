@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import os
 from typing import Any, Dict, List
+import json
 
 from openai import OpenAI
 from .retrieve import top_k, extract_target_phrase, query_keywords
@@ -136,6 +137,164 @@ Study Context:
 
     return answer
 
+def generate_flashcards_from_context(topic: str, context: str, count: int) -> List[Dict[str, str]]:
+    client = OpenAI()
+
+    system_prompt = """
+You are Storm44, an AI study assistant.
+
+Generate study flashcards using ONLY the provided study context.
+
+Rules:
+- Use only the provided context.
+- Do not invent facts.
+- Make the flashcards clear, concise, and useful for studying.
+- Each flashcard must have:
+  - "front": a term, concept, or question
+  - "back": a short answer or definition
+- Return valid JSON only.
+- Do not include markdown or extra text.
+- The JSON must match this shape:
+{
+  "cards": [
+    {
+      "front": "string",
+      "back": "string"
+    }
+  ]
+}
+""".strip()
+
+    user_prompt = f"""
+Topic:
+{topic}
+
+Study Context:
+{context}
+
+Generate exactly {count} flashcards.
+""".strip()
+
+    response = client.responses.create(
+        model=MODEL_NAME,
+        input=[
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_prompt},
+        ],
+    )
+
+    output_text = (response.output_text or "").strip()
+    if not output_text:
+        return []
+
+    try:
+        parsed = json.loads(output_text)
+        cards = parsed.get("cards", [])
+        if not isinstance(cards, list):
+            return []
+
+        cleaned_cards = []
+        for card in cards[:count]:
+            front = str(card.get("front", "")).strip()
+            back = str(card.get("back", "")).strip()
+            if front and back:
+                cleaned_cards.append({
+                    "front": front,
+                    "back": back,
+                })
+
+        return cleaned_cards
+    except Exception:
+        return []
+
+
+def generate_quiz_from_context(topic: str, context: str, count: int) -> List[Dict[str, Any]]:
+    client = OpenAI()
+
+    system_prompt = """
+You are Storm44, an AI study assistant.
+
+Generate multiple-choice quiz questions using ONLY the provided study context.
+
+Rules:
+- Use only the provided context.
+- Do not invent facts.
+- Each question must have exactly 4 unique answer options.
+- "correct_answer" must exactly match one of the 4 options.
+- Include a short explanation.
+- Return valid JSON only.
+- Do not include markdown or extra text.
+- The JSON must match this shape:
+{
+  "questions": [
+    {
+      "question": "string",
+      "options": ["string", "string", "string", "string"],
+      "correct_answer": "string",
+      "explanation": "string"
+    }
+  ]
+}
+""".strip()
+
+    user_prompt = f"""
+Topic:
+{topic}
+
+Study Context:
+{context}
+
+Generate exactly {count} quiz questions.
+""".strip()
+
+    response = client.responses.create(
+        model=MODEL_NAME,
+        input=[
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_prompt},
+        ],
+    )
+
+    output_text = (response.output_text or "").strip()
+    if not output_text:
+        return []
+
+    try:
+        parsed = json.loads(output_text)
+        questions = parsed.get("questions", [])
+        if not isinstance(questions, list):
+            return []
+
+        cleaned_questions = []
+        for q in questions[:count]:
+            question = str(q.get("question", "")).strip()
+            options = q.get("options", [])
+            correct_answer = str(q.get("correct_answer", "")).strip()
+            explanation = str(q.get("explanation", "")).strip()
+
+            if not question or not explanation:
+                continue
+            if not isinstance(options, list) or len(options) != 4:
+                continue
+
+            cleaned_options = [str(opt).strip() for opt in options]
+            if len(set(cleaned_options)) != 4:
+                continue
+            if correct_answer not in cleaned_options:
+                continue
+
+            cleaned_questions.append({
+                "question": question,
+                "options": cleaned_options,
+                "correct_answer": correct_answer,
+                "explanation": explanation,
+            })
+
+        return cleaned_questions
+    except Exception:
+        return []
+    
+
 
 def answer_question(question: str, k: int = 3) -> str:
     results = top_k(question, k=k)
@@ -177,6 +336,49 @@ def answer_question_structured(question: str, k: int = 3) -> Dict[str, Any]:
     return {
         "answer": answer,
         "citations": citations,
+    }
+
+def generate_flashcards_structured(topic: str, count: int = 10, k: int = 3) -> Dict[str, Any]:
+    results = top_k(topic, k=k)
+
+    if not results:
+        return {
+            "cards": [],
+        }
+
+    best_rerank = results[0].get("rerank_score", 0.0) or 0.0
+    if best_rerank < 8.5:
+        return {
+            "cards": [],
+        }
+
+    context = build_context(results)
+    cards = generate_flashcards_from_context(topic, context, count)
+
+    return {
+        "cards": cards,
+    }
+
+
+def generate_quiz_structured(topic: str, count: int = 10, k: int = 3) -> Dict[str, Any]:
+    results = top_k(topic, k=k)
+
+    if not results:
+        return {
+            "questions": [],
+        }
+
+    best_rerank = results[0].get("rerank_score", 0.0) or 0.0
+    if best_rerank < 8.5:
+        return {
+            "questions": [],
+        }
+
+    context = build_context(results)
+    questions = generate_quiz_from_context(topic, context, count)
+
+    return {
+        "questions": questions,
     }
 
 # citation quality improvement helper that picks the best sentence from the chunk based on the query.
