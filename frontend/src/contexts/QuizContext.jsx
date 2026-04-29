@@ -1,7 +1,6 @@
 import { createContext, useContext, useState, useCallback } from 'react';
-import { chatCompletion } from '../utils/openai';
-import { buildContext, wrapContextPrompt } from '../utils/contextBuilder';
 
+const BACKEND_API_URL = import.meta.env.VITE_BACKEND_API_URL || 'http://127.0.0.1:8000';
 const QuizContext = createContext(null);
 
 let nextQuizId = 1;
@@ -52,50 +51,56 @@ export function QuizProvider({ children }) {
 
   // --- AI Quiz Generation ---
   const generateAIQuiz = useCallback(async (notebookId, title, prompt, count, { sources = [], onStatus } = {}) => {
-    const contextText = await buildContext(sources, onStatus);
-    const contextBlock = wrapContextPrompt(contextText);
+  onStatus?.('Generating quiz...');
 
-    onStatus?.('Generating content...');
+  const sourceIds = sources.map((source) => source.id).filter(Boolean);
 
-    const systemPrompt =
-      contextBlock +
-      'You are a quiz generator. You must respond with valid JSON only. ' +
-      'Return an object with a "questions" array. Each question has: ' +
-      '"question" (string), "options" (array of exactly 4 strings), ' +
-      '"correctAnswer" (integer index 0-3 into the options array), ' +
-      '"explanation" (string explaining why the correct answer is right). ' +
-      `Generate exactly ${count} multiple-choice questions.`;
+  const response = await fetch(`${BACKEND_API_URL}/api/v1/quizzes`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      topic: prompt,
+      source_ids: sourceIds,
+      count,
+    }),
+  });
 
-    const userPrompt =
-      `Topic/Material: ${prompt}\n\n` +
-      `Create ${count} multiple-choice questions. ` +
-      'Each must have 4 options with one correct answer. ' +
-      'Make questions clear and explanations concise.';
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    const msg = errorData?.detail
+      ? JSON.stringify(errorData.detail)
+      : errorData?.message;
 
-    const raw = await chatCompletion(systemPrompt, userPrompt, {
-      maxTokens: count * 200,
-      temperature: 0.7,
-      json: true,
-    });
+    throw new Error(msg || `Backend error: ${response.status}`);
+  }
 
-    const parsed = JSON.parse(raw);
-    const items = parsed.questions || [];
+  const data = await response.json();
+  const items = data?.questions || [];
 
-    const quiz = createQuiz(notebookId, title, { isAiGenerated: true });
+  const quiz = createQuiz(notebookId, title, { isAiGenerated: true });
 
-    const newQuestions = items.slice(0, count).map((item, i) => ({
+  const newQuestions = items.slice(0, count).map((item, i) => {
+    const options = Array.isArray(item.options) ? item.options : ['', '', '', ''];
+    const correctAnswerIndex = options.findIndex(
+      (option) => option === item.correct_answer
+    );
+
+    return {
       id: generateQuestionId(),
       quizId: quiz.id,
       question: item.question || '',
-      options: item.options || ['', '', '', ''],
-      correctAnswer: typeof item.correctAnswer === 'number' ? item.correctAnswer : 0,
+      options,
+      correctAnswer: correctAnswerIndex >= 0 ? correctAnswerIndex : 0,
       explanation: item.explanation || '',
       position: i,
-    }));
+    };
+  });
 
-    setQuestions(prev => [...prev, ...newQuestions]);
-    return quiz;
-  }, [createQuiz]);
+  setQuestions(prev => [...prev, ...newQuestions]);
+  return quiz;
+}, [createQuiz]);
 
   return (
     <QuizContext.Provider value={{
