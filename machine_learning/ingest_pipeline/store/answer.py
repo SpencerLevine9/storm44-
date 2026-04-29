@@ -112,6 +112,7 @@ Rules:
 - If the context is incomplete or ambiguous, say so clearly.
 - If multiple related concepts appear in the context, answer only the one the user asked about.
 - Keep the answer concise: usually 2-4 sentences.
+- If the question cannot be answered from the study context (e.g., it asks about general science, history, geography, or anything unrelated to the provided materials), respond with exactly: "I cannot answer this question from the provided study materials. Please ask about topics covered in your uploaded sources."
 """.strip()
 
     user_prompt = f"""

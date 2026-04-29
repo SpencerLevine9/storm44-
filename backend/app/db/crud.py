@@ -128,8 +128,48 @@ async def retrieve_similar_chunks(
     # computing distances. Without MATERIALIZED, the planner may fold the
     # ORDER BY + LIMIT into the HNSW index scan, which returns global top-k
     # candidates before applying the WHERE filter — causing empty results.
-    rows = await conn.fetch(
-        """
+
+    # --- ORIGINAL CODE (Commented out for testing global DB search) ---
+    # rows = await conn.fetch(
+    #     """
+    #     WITH filtered AS MATERIALIZED (
+    #         SELECT
+    #             c.id          AS chunk_id,
+    #             c.source_id,
+    #             c.chunk_index,
+    #             c.text,
+    #             c.start_page,
+    #             c.end_page,
+    #             c.start_time,
+    #             c.end_time,
+    #             s.title       AS source_title,
+    #             s.source_type,
+    #             s.video_url,
+    #             s.video_id,
+    #             s.source_path,
+    #             e.embedding
+    #         FROM embedding e
+    #         JOIN chunk  c ON c.id = e.chunk_id
+    #         JOIN source s ON s.id = c.source_id
+    #         WHERE c.source_id = ANY($2::uuid[])
+    #     )
+    #     SELECT
+    #         chunk_id, source_id, chunk_index, text,
+    #         start_page, end_page, start_time, end_time,
+    #         source_title, source_type, video_url, video_id, source_path,
+    #         embedding <=> $1::vector AS distance
+    #     FROM filtered
+    #     ORDER BY distance
+    #     LIMIT $3
+    #     """,
+    #     vec_literal,
+    #     source_ids,
+    #     k,
+    # )
+
+    # --- TESTING CODE (Global DB Search if source_ids is empty) ---
+    if source_ids:
+        query = """
         WITH filtered AS MATERIALIZED (
             SELECT
                 c.id          AS chunk_id,
@@ -159,11 +199,41 @@ async def retrieve_similar_chunks(
         FROM filtered
         ORDER BY distance
         LIMIT $3
-        """,
-        vec_literal,
-        source_ids,
-        k,
-    )
+        """
+        rows = await conn.fetch(query, vec_literal, source_ids, k)
+    else:
+        query = """
+        WITH filtered AS MATERIALIZED (
+            SELECT
+                c.id          AS chunk_id,
+                c.source_id,
+                c.chunk_index,
+                c.text,
+                c.start_page,
+                c.end_page,
+                c.start_time,
+                c.end_time,
+                s.title       AS source_title,
+                s.source_type,
+                s.video_url,
+                s.video_id,
+                s.source_path,
+                e.embedding
+            FROM embedding e
+            JOIN chunk  c ON c.id = e.chunk_id
+            JOIN source s ON s.id = c.source_id
+        )
+        SELECT
+            chunk_id, source_id, chunk_index, text,
+            start_page, end_page, start_time, end_time,
+            source_title, source_type, video_url, video_id, source_path,
+            embedding <=> $1::vector AS distance
+        FROM filtered
+        ORDER BY distance
+        LIMIT $2
+        """
+        rows = await conn.fetch(query, vec_literal, k)
+
     return [dict(r) for r in rows]
 
 

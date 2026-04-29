@@ -32,3 +32,16 @@ tempPDFfolder/
 # Mac
 .DS_Store
 backend/.DS_Store
+
+# Database dumps
+*.dump
+*.sql.gz
+
+# Binary/archive artifacts
+*.zip
+
+# TestSprite temp files (contain API keys and run-time state)
+backend/testsprite_tests/tmp/config.json
+backend/testsprite_tests/tmp/test_results.json
+backend/testsprite_tests/tmp/raw_report.md
+backend/testsprite_tests/tmp/execution.lock

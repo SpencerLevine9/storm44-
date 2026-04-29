@@ -20,11 +20,11 @@ async def ask(
     req: AskRequest,
     conn: asyncpg.Connection = Depends(get_db_connection),
 ) -> AskResponse:
-    if not req.source_ids:
-        return AskResponse(
-            answer="Please select at least one source to ask a question.",
-            citations=[],
-        )
+    # if not req.source_ids:
+    #     return AskResponse(
+    #         answer="Please select at least one source to ask a question.",
+    #         citations=[],
+    #     )
 
     try:
         # Embed query

@@ -8,5 +8,10 @@
     "id": "TC002",
     "title": "post api v1 ask returns rag generated answer with citations",
     "description": "Test the POST /api/v1/ask endpoint with a valid query and top_k parameter to ensure it returns a 200 status with an answer string and a list of citations containing source_id, chunk_id, snippet, and optional start_seconds and url fields."
+  },
+  {
+    "id": "TC004",
+    "title": "post api v1 ask compares retrieval quality at top_k=2 vs top_k=5",
+    "description": "Test POST /api/v1/ask with top_k=2 and top_k=5 across 7 questions (3 simple Python, 3 detailed Python, 1 off-topic refusal) using source_ids for the Python sources. For Q1–Q6 both calls must return 200 with a non-empty answer string and a citations list; use an LLM judge (gpt-4o-mini) to score each answer 1–5 and record which top_k setting wins. For Q7 (boiling point of water) both top_k=2 and top_k=5 must return a refusal answer. Print full answer text and sources for every question at both k values. Known Python source UUIDs: 038c02b0-f624-4e93-8959-562424a89c78 and 7cce7f29-993c-4a02-a9e5-28d2c774bbe5. Endpoint: POST /api/v1/ask with body {\"query\": \"<question>\", \"source_ids\": [\"<uuid>\"], \"top_k\": <2|5>}."
   }
 ]

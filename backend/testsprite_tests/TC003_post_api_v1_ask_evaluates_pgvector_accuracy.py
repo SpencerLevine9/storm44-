@@ -26,23 +26,23 @@ from openai import OpenAI
 load_dotenv(Path(__file__).resolve().parents[1] / ".env")
 
 BASE_URL = "http://127.0.0.1:8000"
-TIMEOUT = 30
+TIMEOUT = 120  # first request loads the sentence-transformer model (~60 s)
 REPORT_PATH = Path(__file__).parent / "TC003_accuracy_report.md"
 
-# Source IDs by subject (each topic ingested twice — both sets included)
+# Source IDs from the current Azure database (re-ingested 2026-04-25)
 CS_SOURCE_IDS = [
-    "a727e300-1381-4716-8239-7b9dedde8f72",  # Intro CS pages 9-36
-    "09b79014-7568-48d3-b9e5-4a24d3f93759",  # Intro CS pages 39-87
-    "87908c69-f76b-4301-85c8-e96bc7d16776",  # Intro CS pages 9-36 (dup)
-    "bd5a3be3-0618-4ac2-b5ac-cfe456c93f3a",  # Intro CS pages 39-87 (dup)
+    "e00cefdc-fdc0-4ea3-8a82-0c928c50241c",  # Intro CS ch1
+    "bd54313a-ce41-49ce-b777-2f6479882f32",  # Intro CS ch2
 ]
 PYTHON_SOURCE_IDS = [
-    "f64c3841-8f09-420f-b011-264f1ca99ece",  # Intro Python pages 7-35
-    "fe2c6cfc-a06f-4fed-b021-1f6d1e4de6e7",  # Intro Python pages 39-67
-    "2bc8792b-a411-4afe-a572-c3493849085c",  # Intro Python pages 7-35 (dup)
-    "b31691b2-4c4c-4320-b667-eac6d318b489",  # Intro Python pages 39-67 (dup)
+    "038c02b0-f624-4e93-8959-562424a89c78",  # Intro Python prog ch1
+    "7cce7f29-993c-4a02-a9e5-28d2c774bbe5",  # Intro Python prog ch2
 ]
-ALL_SOURCE_IDS = CS_SOURCE_IDS + PYTHON_SOURCE_IDS
+VIDEO_SOURCE_IDS = [
+    "5f5d16a9-47fe-4757-a1a4-9ea9d3fc4d04",  # Video 1
+    "3efbf542-593b-4383-b99b-46ec461b58f2",  # Video 2
+]
+ALL_SOURCE_IDS = CS_SOURCE_IDS + PYTHON_SOURCE_IDS + VIDEO_SOURCE_IDS
 
 client = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
 
@@ -200,7 +200,7 @@ def judge(question: str, reference: str, rag_answer: str) -> dict:
         rag_answer=rag_answer,
     )
     completion = client.chat.completions.create(
-        model="gpt-5-mini",
+        model="gpt-4o-mini",
         messages=[
             {"role": "system", "content": JUDGE_SYSTEM},
             {"role": "user", "content": prompt},
@@ -322,7 +322,7 @@ def write_report(results: list[dict]) -> None:
         "# TC003 — pgvector RAG Accuracy Report\n",
         f"**Date:** 2026-03-24  ",
         f"**Sources:** CS ({len(CS_SOURCE_IDS)}) + Python ({len(PYTHON_SOURCE_IDS)})  ",
-        f"**Model:** gpt-5-mini (LLM judge)\n",
+        f"**Model:** gpt-4o-mini (LLM judge)\n",
         "---\n",
         "## Summary\n",
         "| ID | Question | Ref Score | RAG Score | Winner | Status |",
