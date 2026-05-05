@@ -121,6 +121,8 @@ OpenAI Answer Generation
         v
 Grounded AI Tutor Response + Citations
 
+```
+
 # AI Tutor Flow
 
 When a user asks the tutor a question:
@@ -183,7 +185,7 @@ Example request:
 }
 
 Example response:
-
+```
 {
   "answer": "Computer science is the study of computing...",
   "citations": [
@@ -197,17 +199,20 @@ Example response:
   ],
   "model_used": "gpt-5-mini"
 }
+```
 
 # Tutor Model Options
 GET /api/v1/ask/models
 
 Example response:
-
+```
 {
   "default_model": "gpt-5-mini",
   "fallback_model": "gpt-4.1-mini",
   "allowed_models": ["gpt-4.1-mini", "gpt-5-mini"]
 }
+```
+
 Project Structure
 storm44/
 |
@@ -260,9 +265,10 @@ storm44/
 │           └── postgres.py
 |
 └── README.md
-Environment Variables
 
-Create a backend environment file:
+# Environment Variables
+
+## Create a backend environment file:
 
 backend/.env
 
