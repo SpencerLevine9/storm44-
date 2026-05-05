@@ -1,6 +1,5 @@
 import os
 from contextlib import asynccontextmanager
-from pathlib import Path
 
 from dotenv import load_dotenv
 from fastapi import FastAPI
@@ -8,20 +7,18 @@ from fastapi.middleware.cors import CORSMiddleware
 
 load_dotenv()
 
-from app.database.database import close_pool, get_db, init_db  # noqa: E402
+from app.db.database import init_pool, close_pool  # noqa: E402
 from app.api.v1.router import api_router
 
 FRONTEND_ORIGIN = os.getenv("FRONTEND_ORIGIN", "http://localhost:5173")
 
-load_dotenv(Path(__file__).parent.parent / ".env")
-
 
 @asynccontextmanager
-async def lifespan(application: FastAPI):
-    init_db()
-    print("Database tables initialised.")
+async def lifespan(_: FastAPI):
+    await init_pool()
+    print("Database pool initialised.")
     yield
-    close_pool()
+    await close_pool()
     print("Connection pool closed.")
 
 
@@ -34,13 +31,5 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-
-@app.get("/health")
-def health_check():
-    with get_db() as conn:
-        with conn.cursor() as cur:
-            cur.execute("SELECT 1")
-    return {"status": "ok", "database": "connected"}
 
 app.include_router(api_router, prefix="/api/v1")
