@@ -299,20 +299,22 @@ Never commit real API keys to GitHub.
 # Backend Setup
 
 From the project root:
-
+```
 cd backend
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
+```
 
 ## Return to the project root and run the backend with:
-
+```
 $env:TUTOR_PRIMARY_MODEL="gpt-5-mini"
 $env:TUTOR_FALLBACK_MODEL="gpt-4.1-mini"
 $env:TUTOR_ALLOWED_MODELS="gpt-5-mini,gpt-4.1-mini"
 $env:PYTHONPATH = "$PWD;$PWD\backend"
 
 python -m uvicorn app.main:app --reload --port 8000
+```
 
 ## Backend will run at:
 
@@ -321,10 +323,11 @@ http://127.0.0.1:8000
 ## Frontend Setup
 
 From the project root:
-
+```
 cd frontend
 npm install
 npm run dev
+```
 
 ## Frontend will run at:
 
@@ -334,32 +337,41 @@ Running the Full Application
 # Open two terminals.
 
 ## Terminal 1: Backend
+```
 $env:TUTOR_PRIMARY_MODEL="gpt-5-mini"
 $env:TUTOR_FALLBACK_MODEL="gpt-4.1-mini"
 $env:TUTOR_ALLOWED_MODELS="gpt-5-mini,gpt-4.1-mini"
 $env:PYTHONPATH = "$PWD;$PWD\backend"
 
 python -m uvicorn app.main:app --reload --port 8000
+```
 
 ## Terminal 2: Frontend
+```
 cd frontend
 npm run dev
+```
 
 # Then open:
 http://localhost:5173
 Testing the Backend
 
 # Test Health
+```
 Invoke-RestMethod `
   -Uri "http://127.0.0.1:8000/health" `
   -Method GET
+```
 
 # Test Tutor Models
+```
 Invoke-RestMethod `
   -Uri "http://127.0.0.1:8000/api/v1/ask/models" `
   -Method GET
+```
 
 # Test Tutor Ask Endpoint
+```
 $response = Invoke-RestMethod `
   -Uri "http://127.0.0.1:8000/api/v1/ask" `
   -Method POST `
@@ -367,15 +379,17 @@ $response = Invoke-RestMethod `
   -Body '{"query":"what is computer science?","top_k":3,"model":"gpt-4.1-mini"}'
 
 $response | ConvertTo-Json -Depth 10
+```
 
 ## Expected response should include:
-
+```
 {
   "answer": "...",
   "citations": [...],
   "model_used": "gpt-4.1-mini"
 }
 Demo Flow
+```
 
 # A typical demo flow:
 
@@ -425,7 +439,7 @@ Marcus: Database and pgvector-related development
 Git Hygiene
 
 # Before committing, avoid including:
-
+```
 .env
 backend/.env
 frontend/.env
@@ -435,9 +449,10 @@ __pycache__/
 .DS_Store
 dist/
 build/
+```
 
 # Recommended .gitignore additions:
-
+```
 .env
 backend/.env
 frontend/.env
@@ -448,5 +463,6 @@ __pycache__/
 dist/
 build/
 Project Status
+```
 
 Storm44 currently has a working AI tutor flow with retrieval-grounded answers, citations, and selectable tutor models. The next major milestone is completing source-grounded flashcard and quiz generation so uploaded PDFs and YouTube materials automatically become study tools.
