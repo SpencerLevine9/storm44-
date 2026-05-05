@@ -144,17 +144,18 @@ Storm44 supports configurable tutor model switching.
 
 The backend exposes:
 
-GET /api/v1/ask/models
+`GET /api/v1/ask/models`
 
 This returns the default model, fallback model, and allowed tutor models.
 
 The chat endpoint accepts an optional model field:
-
+```
 {
   "query": "What is computer science?",
   "top_k": 5,
   "model": "gpt-4.1-mini"
 }
+```
 
 The backend validates the requested model before using it. If an invalid model is requested, the backend rejects the request. If the selected model fails, the backend can fall back to the configured fallback model.
 
@@ -163,7 +164,7 @@ The frontend includes a Tutor Model dropdown that lets users select between allo
 # API Endpoints
 
 ## Health Check
-
+```
 GET /health
 
 Returns:
@@ -171,8 +172,10 @@ Returns:
 {
   "status": "ok"
 }
+```
 
 # Ask Tutor
+```
 POST /api/v1/ask
 
 Example request:
@@ -183,6 +186,7 @@ Example request:
   "top_k": 5,
   "model": "gpt-5-mini"
 }
+```
 
 Example response:
 ```
@@ -202,7 +206,7 @@ Example response:
 ```
 
 # Tutor Model Options
-GET /api/v1/ask/models
+`GET /api/v1/ask/models`
 
 Example response:
 ```
@@ -272,27 +276,27 @@ storm44/
 
 ## Create a backend environment file:
 
-backend/.env
+`backend/.env`
 
 Example:
 
-OPENAI_API_KEY=your_openai_api_key_here
+`OPENAI_API_KEY=your_openai_api_key_here`
 
 FRONTEND_ORIGIN=http://localhost:5173
 
-TUTOR_PRIMARY_MODEL=gpt-5-mini
-TUTOR_FALLBACK_MODEL=gpt-4.1-mini
-TUTOR_ALLOWED_MODELS=gpt-5-mini,gpt-4.1-mini
+`TUTOR_PRIMARY_MODEL=gpt-5-mini`
+`TUTOR_FALLBACK_MODEL=gpt-4.1-mini`
+`TUTOR_ALLOWED_MODELS=gpt-5-mini,gpt-4.1-mini`
 
-EMBED_MODEL=sentence-transformers/all-MiniLM-L6-v2
+`EMBED_MODEL=sentence-transformers/all-MiniLM-L6-v2`
 
 # Create a frontend environment file:
 
-frontend/.env
+`frontend/.env`
 
 Example:
 
-VITE_BACKEND_API_URL=http://127.0.0.1:8000
+`VITE_BACKEND_API_URL=http://127.0.0.1:8000`
 
 Never commit real API keys to GitHub.
 
@@ -318,7 +322,7 @@ python -m uvicorn app.main:app --reload --port 8000
 
 ## Backend will run at:
 
-http://127.0.0.1:8000
+`http://127.0.0.1:8000`
 
 ## Frontend Setup
 
@@ -331,7 +335,7 @@ npm run dev
 
 ## Frontend will run at:
 
-http://localhost:5173
+`http://localhost:5173`
 Running the Full Application
 
 # Open two terminals.
@@ -353,7 +357,7 @@ npm run dev
 ```
 
 # Then open:
-http://localhost:5173
+`http://localhost:5173`
 Testing the Backend
 
 # Test Health
