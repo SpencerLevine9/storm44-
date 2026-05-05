@@ -214,6 +214,7 @@ Example response:
 ```
 
 Project Structure
+```
 storm44/
 |
 ├── backend/
@@ -265,6 +266,7 @@ storm44/
 │           └── postgres.py
 |
 └── README.md
+```
 
 # Environment Variables
 
