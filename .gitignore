@@ -40,6 +40,8 @@ backend/.DS_Store
 # Binary/archive artifacts
 *.zip
 
+testrprite_tests/tmp/*
+
 # TestSprite temp files (contain API keys and run-time state)
 backend/testsprite_tests/tmp/config.json
 backend/testsprite_tests/tmp/test_results.json
