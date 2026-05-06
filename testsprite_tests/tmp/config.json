@@ -1,18 +1,29 @@
 {
-  "status": "init",
+  "status": "commited",
+  "type": "backend",
+  "scope": "codebase",
+  "localEndpoint": "http://localhost:8000",
+  "backendAuthType": "public",
   "executionArgs": {
     "projectName": "storm44-",
     "projectPath": "/Users/marcuspetrov/Desktop/storm44-",
     "testIds": [
-      "TC_BE_001",
-      "TC_BE_002",
-      "TC_BE_003",
-      "TC_BE_004"
+      "TC009",
+      "TC010",
+      "TC011",
+      "TC012",
+      "TC013",
+      "TC014",
+      "TC015",
+      "TC016",
+      "TC017"
     ],
-    "additionalInstruction": "Backend FastAPI server is running at http://127.0.0.1:8000. The DATABASE_URL is postgresql://marcuspetrov:805Marcus@127.0.0.1:5432/storm44. The database has been seeded with 12 sources and 958 chunks+embeddings. Currently implemented endpoints: GET /api/v1/health returns {\"status\":\"ok\"}, POST /api/v1/ask accepts {\"query\": str, \"source_ids\": [], \"top_k\": int} and returns {\"answer\": str, \"citations\": [...]}. Endpoints /ingest, /query, /flashcards/generate do NOT exist yet — test what is available and report gaps for unimplemented endpoints. For TC_BE_003 (similarity search), test via a direct asyncpg DB query against the embeddings table using the pgvector <=> cosine distance operator. For TC_BE_004 (flashcard CRUD), test the crud.py functions directly: save_flashcards and get_flashcards against the live DB.",
+    "additionalInstruction": "Run only the backend TC009–TC017 test files located in testsprite_tests/. Each test file is a plain Python script with a function called at the bottom. Use the existing test files as-is — do not regenerate them. The backend is running at http://localhost:8000. Execute each test by running: python testsprite_tests/TCXXX_*.py and report pass/fail for each.",
     "serverMode": "development",
     "envs": {
       "API_KEY": "sk-user-LH3hWQPz2_QggyUHC3YRVfY_zlqlsO4QTjAL1Vt8l6IXH8Zuz3qHZLjqI0h6DFfPX_-F3eVghETe9dmWxdAbVLD9ZtOCzNZvaJLshjNZwoztOmI14luMmjzDboadjOo7buQ"
     }
-  }
+  },
+  "serverPort": 49594,
+  "proxy": "http://d9b6731c-87d4-4301-8e50-f6c60095f1f3:aRkERawohSqpAHafUO8UhDxIV1VoX1mZ@tun.testsprite.com:8080"
 }
