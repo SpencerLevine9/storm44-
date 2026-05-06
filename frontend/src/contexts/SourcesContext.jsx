@@ -11,9 +11,9 @@ function generateSourceId() {
 export function SourcesProvider({ children }) {
   const [sources, setSources] = useState([]);
 
-  const addSource = useCallback((notebookId, { title, type, content = null, url = null, fileName = null }) => {
+  const addSource = useCallback((notebookId, { id = null, title, type, content = null, url = null, fileName = null }) => {
     const newSource = {
-      id: generateSourceId(),
+      id: id ?? generateSourceId(),
       notebookId,
       title,
       type,
@@ -30,7 +30,11 @@ export function SourcesProvider({ children }) {
   const removeSource = useCallback((sourceId) => {
     setSources(prev => {
       const source = prev.find(s => s.id === sourceId);
-      if (source?.type === 'pdf' && source.fileName) {
+      if (source && !source.id.startsWith('src-')) {
+        // DB-backed source — delete from backend
+        fetch(`http://localhost:8000/api/v1/sources/delete/${encodeURIComponent(source.id)}`, { method: 'DELETE' }).catch(() => {});
+      } else if (source?.type === 'pdf' && source.fileName) {
+        // Legacy local-only source
         fetch(`/api/delete-pdf/${encodeURIComponent(source.fileName)}`, { method: 'DELETE' }).catch(() => {});
       }
       return prev.filter(s => s.id !== sourceId);

@@ -330,3 +330,61 @@ async def get_quiz_questions(
 
 async def delete_quiz_questions(pool: asyncpg.Pool, source_id: UUID) -> None:
     await pool.execute("DELETE FROM quiz_question WHERE source_id = $1", source_id)
+
+
+# ---------------------------------------------------------------------------
+# Source Deletion
+# ---------------------------------------------------------------------------
+
+async def delete_source(conn: asyncpg.Connection, source_id: UUID) -> None:
+    """
+    Delete a source and all related rows.
+    Relies on ON DELETE CASCADE for chunk → embedding and source → video_segment.
+    If cascade is not configured, deletes are ordered manually.
+    """
+    await conn.execute(
+        """
+        DELETE FROM embedding
+        WHERE chunk_id IN (
+            SELECT id FROM chunk WHERE source_id = $1
+        )
+        """,
+        source_id,
+    )
+    await conn.execute("DELETE FROM video_segment WHERE source_id = $1", source_id)
+    await conn.execute("DELETE FROM chunk WHERE source_id = $1", source_id)
+    await conn.execute("DELETE FROM source WHERE id = $1", source_id)
+
+
+# ---------------------------------------------------------------------------
+# Video Segment Insertion
+# ---------------------------------------------------------------------------
+
+async def insert_video_segments(
+    conn: asyncpg.Connection,
+    source_id: UUID,
+    segments: list[dict],
+) -> None:
+    """
+    Bulk-insert video_segment rows for a YouTube source.
+    Each segment dict must have: text, start (float), duration (float).
+    seg_index is assigned by position.
+    """
+    await conn.executemany(
+        """
+        INSERT INTO video_segment (source_id, text, start_time, duration, seg_index)
+        VALUES ($1, $2, $3, $4, $5)
+        ON CONFLICT (source_id, seg_index) DO NOTHING
+        """,
+        [
+            (
+                source_id,
+                seg.get("text", "").strip(),
+                float(seg.get("start", 0.0)),
+                float(seg.get("duration", 0.0)) if seg.get("duration") is not None else None,
+                idx,
+            )
+            for idx, seg in enumerate(segments)
+            if seg.get("text", "").strip()
+        ],
+    )

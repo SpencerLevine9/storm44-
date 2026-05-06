@@ -66,3 +66,4 @@ docs/ingestion_implementation_plan.md
 testsprite_tests/tmp/config.json
 testsprite_tests/tmp/config.json
 testsprite_tests/tmp/config.json
+restart.sh

@@ -120,28 +120,48 @@ def fetch_transcript_text(video_id: str) -> Optional[Dict[str, Any]]:
     Returns dict with:
       - text
       - language
-      - segments
+      - segments (list of dicts with text/start/duration)
     OR returns None if no transcript is available.
+    Compatible with youtube-transcript-api >= 1.0 (instance-based API).
     """
+    api = YouTubeTranscriptApi()
+    raw_segments = None
+    language = None
+
     try:
-        segments = YouTubeTranscriptApi.get_transcript(video_id, languages=["en"])
+        fetched = api.fetch(video_id, languages=["en"])
+        raw_segments = fetched
         language = "en"
     except Exception:
         try:
-            segments = YouTubeTranscriptApi.get_transcript(video_id)
-            language = None
+            fetched = api.fetch(video_id)
+            raw_segments = fetched
         except Exception:
-            return None   # <-- KEY CHANGE
+            return None
+
+    if not raw_segments:
+        return None
+
+    # Normalise to plain dicts regardless of snippet object type
+    segments = []
+    for s in raw_segments:
+        if hasattr(s, "text"):
+            segments.append({
+                "text": s.text.strip(),
+                "start": float(s.start),
+                "duration": float(getattr(s, "duration", 0.0)),
+            })
+        elif isinstance(s, dict):
+            segments.append({
+                "text": s.get("text", "").strip(),
+                "start": float(s.get("start", 0.0)),
+                "duration": float(s.get("duration", 0.0)),
+            })
 
     if not segments:
         return None
 
-    text = "\n".join(
-        s.get("text", "").strip()
-        for s in segments
-        if s.get("text")
-    ).strip()
-
+    text = "\n".join(s["text"] for s in segments if s["text"]).strip()
     if not text:
         return None
 

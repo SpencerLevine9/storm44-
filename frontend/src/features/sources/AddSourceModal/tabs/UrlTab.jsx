@@ -25,7 +25,7 @@ export default function UrlTab() {
 
     const fetchYouTubeTitle = async (url) => {
         try {
-            const res = await fetch(`/api/youtube-title?url=${encodeURIComponent(url)}`);
+            const res = await fetch(`http://localhost:8000/api/v1/sources/youtube-title?url=${encodeURIComponent(url)}`);
             if (!res.ok) return null;
             const data = await res.json();
             return data.title || null;
@@ -43,23 +43,45 @@ export default function UrlTab() {
             return;
         }
 
+        if (!isYouTubeUrl(urlValue)) {
+            setError('Only YouTube URLs are supported for ingestion.');
+            return;
+        }
+
         setIsSubmitting(true);
 
         let title = new URL(urlValue).hostname;
+        const ytTitle = await fetchYouTubeTitle(urlValue);
+        if (ytTitle) title = ytTitle;
 
-        if (isYouTubeUrl(urlValue)) {
-            const ytTitle = await fetchYouTubeTitle(urlValue);
-            if (ytTitle) title = ytTitle;
+        try {
+            const res = await fetch('http://localhost:8000/api/v1/sources/upload/youtube', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ url: urlValue, title }),
+            });
+
+            if (!res.ok) {
+                const err = await res.json().catch(() => ({}));
+                setError(err.detail || 'Failed to ingest video. It may have no captions.');
+                setIsSubmitting(false);
+                return;
+            }
+
+            const result = await res.json();
+            addSource(activeNotebookId, {
+                id: result.source_id,
+                title,
+                type: 'url',
+                url: urlValue,
+            });
+            setUrlValue('');
+            closeModal();
+        } catch {
+            setError('Network error. Is the backend running?');
+        } finally {
+            setIsSubmitting(false);
         }
-
-        addSource(activeNotebookId, {
-            title,
-            type: 'url',
-            url: urlValue,
-        });
-        setUrlValue('');
-        setIsSubmitting(false);
-        closeModal();
     };
 
     return (

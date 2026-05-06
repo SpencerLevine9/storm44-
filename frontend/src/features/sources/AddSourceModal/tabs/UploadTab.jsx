@@ -17,6 +17,7 @@ export default function UploadTab() {
 
         const formData = new FormData();
         formData.append('file', file);
+        formData.append('title', file.name);
 
         const xhr = new XMLHttpRequest();
 
@@ -36,10 +37,9 @@ export default function UploadTab() {
                     item.id === id ? { ...item, status: 'completed', progress: 100 } : item
                 ));
                 addSource(activeNotebookId, {
+                    id: result.source_id,
                     title: file.name,
                     type: 'pdf',
-                    fileName: result.filename,
-                    content: `/api/pdf-file/${encodeURIComponent(result.filename)}`,
                 });
             } else {
                 setUploadQueue(prev => prev.map(item =>
@@ -54,7 +54,7 @@ export default function UploadTab() {
             ));
         });
 
-        xhr.open('POST', '/api/upload-pdf');
+        xhr.open('POST', 'http://localhost:8000/api/v1/sources/upload/pdf');
         xhr.send(formData);
     }, [setUploadQueue, addSource, activeNotebookId]);
 
