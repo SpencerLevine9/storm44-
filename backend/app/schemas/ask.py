@@ -1,7 +1,7 @@
 # Pydantic schemas for the api/v1/ask endpoint
 
 from typing import List, Optional
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
 # ---------------------------
 # Citation Schema
@@ -23,9 +23,18 @@ class Citation(BaseModel):
 # This defines what the frontend sends to the backend when a user asks a question.
 
 class AskRequest(BaseModel):
-    query: str = Field(..., min_length=1, description="User question")
+    query: Optional[str] = Field(None, min_length=1, description="User question")
+    question: Optional[str] = Field(None, description="Alias for query")
     source_ids: List[str] = Field(default_factory=list, description="Selected sources to search")
     top_k: int = Field(5, ge=1, le=20, description="How many chunks to retrieve")
+
+    @model_validator(mode="after")
+    def resolve_query(self) -> "AskRequest":
+        if not self.query and self.question:
+            self.query = self.question
+        if not self.query:
+            raise ValueError("query is required")
+        return self
 
 
 # ---------------------------

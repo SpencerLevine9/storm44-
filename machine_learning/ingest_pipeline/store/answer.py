@@ -8,7 +8,16 @@ from openai import OpenAI
 from .retrieve import top_k, extract_target_phrase, query_keywords
 import re
 
-MODEL_NAME = os.getenv("OPENAI_MODEL", "gpt-5-mini")
+MODEL_NAME = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
+
+_openai_client: OpenAI | None = None
+
+
+def _get_client() -> OpenAI:
+    global _openai_client
+    if _openai_client is None:
+        _openai_client = OpenAI()
+    return _openai_client
 
 MAX_CONTEXT_RESULTS = 2
 MAX_CHARS_PER_CHUNK = 500
@@ -95,7 +104,7 @@ def build_context(results: List[Dict[str, Any]]) -> str:
 
 
 def generate_grounded_answer(question: str, context: str) -> str:
-    client = OpenAI()
+    client = _get_client()
 
     system_prompt = """
 You are Storm44, an AI study assistant.
@@ -139,7 +148,7 @@ Study Context:
     return answer
 
 def generate_flashcards_from_context(topic: str, context: str, count: int) -> List[Dict[str, str]]:
-    client = OpenAI()
+    client = _get_client()
 
     system_prompt = """
 You are Storm44, an AI study assistant.
@@ -210,7 +219,7 @@ Generate exactly {count} flashcards.
 
 
 def generate_quiz_from_context(topic: str, context: str, count: int) -> List[Dict[str, Any]]:
-    client = OpenAI()
+    client = _get_client()
 
     system_prompt = """
 You are Storm44, an AI study assistant.

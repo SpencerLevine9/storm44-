@@ -17,6 +17,10 @@ FRONTEND_ORIGIN = os.getenv("FRONTEND_ORIGIN", "http://localhost:5173")
 async def lifespan(_: FastAPI):
     await init_pool()
     print("Database pool initialised.")
+    import asyncio
+    from machine_learning.ingest_pipeline.store.retrieve import embed_query_local
+    await asyncio.get_event_loop().run_in_executor(None, embed_query_local, "warmup")
+    print("Embedding model warmed up.")
     yield
     await close_pool()
     print("Connection pool closed.")

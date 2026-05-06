@@ -62,3 +62,7 @@ testsprite_tests/tmp/raw_report.md
 testsprite_tests/tmp/test_results.json
 testsprite_tests/tmp/prd_files/e2e_testsprite_specification.md
 docs/e2e_testsprite_specification.md
+docs/ingestion_implementation_plan.md
+testsprite_tests/tmp/config.json
+testsprite_tests/tmp/config.json
+testsprite_tests/tmp/config.json
