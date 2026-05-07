@@ -250,3 +250,118 @@ def top_k(query: str, k: int = 5, candidate_pool: int = 20) -> List[Dict[str, An
             }
         )
     return results
+
+# Part of backend process 
+def _normalize_source_key(value: Any) -> str:
+    value = str(value or "").strip().lower()
+    value = value.replace("\\", "/")
+
+    # Keep only filename if a path was passed
+    if "/" in value:
+        value = value.split("/")[-1]
+
+    return value
+
+
+def _source_match_candidates(meta: Dict[str, Any]) -> set[str]:
+    candidates = set()
+
+    for key in ["source_file", "title", "url", "video_id", "chunk_id"]:
+        value = meta.get(key)
+        if value:
+            normalized = _normalize_source_key(value)
+            candidates.add(normalized)
+
+            # Also include filename stem, e.g. Intro_CS_ch1.pdf -> intro_cs_ch1
+            try:
+                stem = Path(normalized).stem.lower()
+                if stem:
+                    candidates.add(stem)
+            except Exception:
+                pass
+
+    return candidates
+
+
+def get_chunks_for_sources(
+    source_ids: List[str],
+    max_chunks_per_source: int = 8,
+) -> List[Dict[str, Any]]:
+    """
+    Load chunks that belong to specific uploaded/selected sources.
+
+    The frontend may send a PDF filename, YouTube URL, title, video id, or source label.
+    This function tries to match those values against retrieval metadata.
+    """
+    if not source_ids:
+        return []
+
+    _, meta = load_index()
+
+    requested = set()
+
+    for source_id in source_ids:
+        normalized = _normalize_source_key(source_id)
+        if normalized:
+            requested.add(normalized)
+
+            try:
+                stem = Path(normalized).stem.lower()
+                if stem:
+                    requested.add(stem)
+            except Exception:
+                pass
+
+    if not requested:
+        return []
+
+    matched_by_source: Dict[str, List[Dict[str, Any]]] = {}
+
+    for m in meta:
+        candidates = _source_match_candidates(m)
+
+        if not candidates.intersection(requested):
+            continue
+
+        source_key = (
+            m.get("source_file")
+            or m.get("video_id")
+            or m.get("title")
+            or m.get("url")
+            or "unknown"
+        )
+
+        if source_key not in matched_by_source:
+            matched_by_source[source_key] = []
+
+        if len(matched_by_source[source_key]) >= max_chunks_per_source:
+            continue
+
+        text = find_chunk_text(m)
+
+        if not text or text.startswith("["):
+            continue
+
+        matched_by_source[source_key].append({
+            "rank": len(matched_by_source[source_key]) + 1,
+            "score": 1.0,
+            "rerank_score": 99.0,
+            "source_type": m.get("source_type"),
+            "chunk_id": m.get("chunk_id"),
+            "text": text,
+            "source_file": m.get("source_file"),
+            "start_page": m.get("start_page"),
+            "end_page": m.get("end_page"),
+            "title": m.get("title"),
+            "url": m.get("url"),
+            "video_id": m.get("video_id"),
+            "start_time": m.get("start_time"),
+            "end_time": m.get("end_time"),
+        })
+
+    results: List[Dict[str, Any]] = []
+
+    for chunks in matched_by_source.values():
+        results.extend(chunks)
+
+    return results

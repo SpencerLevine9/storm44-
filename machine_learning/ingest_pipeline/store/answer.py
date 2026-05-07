@@ -5,7 +5,7 @@ from typing import Any, Dict, List
 import json
 
 from openai import OpenAI
-from .retrieve import top_k, extract_target_phrase, query_keywords
+from .retrieve import top_k, extract_target_phrase, query_keywords, get_chunks_for_sources
 import re
 
 MODEL_NAME = os.getenv("OPENAI_MODEL", "gpt-5-mini")
@@ -92,6 +92,34 @@ def build_context(results: List[Dict[str, Any]]) -> str:
         chunks.append(f"{source_label}\n{text}")
 
     return "\n\n" + ("\n\n".join(chunks))
+
+# part of process of backend pdf/video -> generate flashcards and quizzes
+
+def build_study_tool_context(
+    results: List[Dict[str, Any]],
+    max_results: int = 8,
+    max_chars_per_chunk: int = 900,
+) -> str:
+    chunks = []
+
+    for i, r in enumerate(results[:max_results], start=1):
+        if r.get("source_type") == "youtube":
+            source_label = (
+                f"Source {i} | YouTube | "
+                f"{r.get('title') or 'YouTube Video'} | "
+                f"time {format_time(r.get('start_time'))}-{format_time(r.get('end_time'))}"
+            )
+        else:
+            source_label = (
+                f"Source {i} | PDF | "
+                f"{r.get('source_file') or 'PDF'} | "
+                f"pages {r.get('start_page')}-{r.get('end_page')}"
+            )
+
+        text = trim_chunk_text(r.get("text") or "", max_chars=max_chars_per_chunk)
+        chunks.append(f"{source_label}\n{text}")
+
+    return "\n\n" + "\n\n".join(chunks)
 
 
 def generate_grounded_answer(question: str, context: str) -> str:
@@ -338,21 +366,34 @@ def answer_question_structured(question: str, k: int = 3) -> Dict[str, Any]:
         "citations": citations,
     }
 
-def generate_flashcards_structured(topic: str, count: int = 10, k: int = 3) -> Dict[str, Any]:
-    results = top_k(topic, k=k)
+def generate_flashcards_structured(
+    topic: str,
+    source_ids: List[str] | None = None,
+    count: int = 10,
+    k: int = 3,
+) -> Dict[str, Any]:
+    source_ids = source_ids or []
+
+    if source_ids:
+        results = get_chunks_for_sources(source_ids, max_chunks_per_source=8)
+    else:
+        results = top_k(topic, k=k)
 
     if not results:
         return {
             "cards": [],
         }
 
-    best_rerank = results[0].get("rerank_score", 0.0) or 0.0
-    if best_rerank < 8.5:
-        return {
-            "cards": [],
-        }
+    # Only use rerank threshold when we are doing query-based retrieval.
+    # If source_ids were provided, the source itself is the grounding signal.
+    if not source_ids:
+        best_rerank = results[0].get("rerank_score", 0.0) or 0.0
+        if best_rerank < 8.5:
+            return {
+                "cards": [],
+            }
 
-    context = build_context(results)
+    context = build_study_tool_context(results)
     cards = generate_flashcards_from_context(topic, context, count)
 
     return {
@@ -360,21 +401,34 @@ def generate_flashcards_structured(topic: str, count: int = 10, k: int = 3) -> D
     }
 
 
-def generate_quiz_structured(topic: str, count: int = 10, k: int = 3) -> Dict[str, Any]:
-    results = top_k(topic, k=k)
+def generate_quiz_structured(
+    topic: str,
+    source_ids: List[str] | None = None,
+    count: int = 10,
+    k: int = 3,
+) -> Dict[str, Any]:
+    source_ids = source_ids or []
+
+    if source_ids:
+        results = get_chunks_for_sources(source_ids, max_chunks_per_source=8)
+    else:
+        results = top_k(topic, k=k)
 
     if not results:
         return {
             "questions": [],
         }
 
-    best_rerank = results[0].get("rerank_score", 0.0) or 0.0
-    if best_rerank < 8.5:
-        return {
-            "questions": [],
-        }
+    # Only use rerank threshold when we are doing query-based retrieval.
+    # If source_ids were provided, the source itself is the grounding signal.
+    if not source_ids:
+        best_rerank = results[0].get("rerank_score", 0.0) or 0.0
+        if best_rerank < 8.5:
+            return {
+                "questions": [],
+            }
 
-    context = build_context(results)
+    context = build_study_tool_context(results)
     questions = generate_quiz_from_context(topic, context, count)
 
     return {

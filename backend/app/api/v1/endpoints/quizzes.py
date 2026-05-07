@@ -8,7 +8,11 @@ router = APIRouter()
 @router.post("/quizzes", response_model=QuizResponse)
 def generate_quiz(req: QuizRequest) -> QuizResponse:
     try:
-        result = generate_quiz_structured(req.topic, count=req.count)
+        result = generate_quiz_structured(
+            topic=req.topic,
+            source_ids=req.source_ids,
+            count=req.count,
+        )
         questions = [QuizQuestion(**q) for q in result.get("questions", [])]
         return QuizResponse(questions=questions)
     except Exception as e:

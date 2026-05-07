@@ -93,7 +93,10 @@ export function FlashcardProvider({ children }) {
   const generateAIDeck = useCallback(async (notebookId, title, prompt, count, { sources = [], onStatus } = {}) => {
     onStatus?.('Generating flashcards...');
 
-    const sourceIds = sources.map((source) => source.id).filter(Boolean);
+    // for backend processing for upload pdf/video to generate flashcards and quizzes
+    const sourceIds = sources
+      .map((source) => source.fileName || source.url || source.title || source.id)
+      .filter(Boolean);
 
     const response = await fetch(`${BACKEND_API_URL}/api/v1/flashcards`, {
       method: 'POST',
@@ -118,6 +121,10 @@ export function FlashcardProvider({ children }) {
 
     const data = await response.json();
     const flashcards = data?.cards || [];
+
+    if (flashcards.length === 0) {
+      throw new Error('No flashcards could be generated from the selected source.');
+    }
 
     const deck = createDeck(notebookId, title, { isAiGenerated: true });
 

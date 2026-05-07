@@ -53,7 +53,9 @@ export function QuizProvider({ children }) {
   const generateAIQuiz = useCallback(async (notebookId, title, prompt, count, { sources = [], onStatus } = {}) => {
   onStatus?.('Generating quiz...');
 
-  const sourceIds = sources.map((source) => source.id).filter(Boolean);
+  const sourceIds = sources
+    .map((source) => source.fileName || source.url || source.title || source.id)
+    .filter(Boolean);
 
   const response = await fetch(`${BACKEND_API_URL}/api/v1/quizzes`, {
     method: 'POST',
@@ -78,6 +80,10 @@ export function QuizProvider({ children }) {
 
   const data = await response.json();
   const items = data?.questions || [];
+
+  if (items.length === 0) {
+    throw new Error('No quiz questions could be generated from the selected source.');
+  }
 
   const quiz = createQuiz(notebookId, title, { isAiGenerated: true });
 

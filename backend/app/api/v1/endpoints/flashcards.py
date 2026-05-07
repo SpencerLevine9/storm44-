@@ -8,7 +8,11 @@ router = APIRouter()
 @router.post("/flashcards", response_model=FlashcardResponse)
 def generate_flashcards(req: FlashcardRequest) -> FlashcardResponse:
     try:
-        result = generate_flashcards_structured(req.topic, count=req.count)
+        result = generate_flashcards_structured(
+            topic=req.topic,
+            source_ids=req.source_ids,
+            count=req.count,
+        )
         cards = [Flashcard(**card) for card in result.get("cards", [])]
         return FlashcardResponse(cards=cards)
     except Exception as e:
