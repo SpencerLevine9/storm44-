@@ -17,6 +17,55 @@ REFUSAL_MESSAGE = (
     "I can only answer questions grounded in the uploaded materials. "
     "Try asking about topics like computational thinking, Python, computer science, or machine learning."
 )
+# ------------------------------------------------------------------------
+def get_tutor_models() -> tuple[str, str]:
+    primary_model = os.getenv(
+        "TUTOR_PRIMARY_MODEL",
+        os.getenv("OPENAI_MODEL", "gpt-5-mini")
+    ).strip()
+
+    fallback_model = os.getenv(
+        "TUTOR_FALLBACK_MODEL",
+        "gpt-4.1-mini"
+    ).strip()
+
+    return primary_model, fallback_model
+
+
+def get_allowed_tutor_models() -> set[str]:
+    primary_model, fallback_model = get_tutor_models()
+    raw_allowed = os.getenv("TUTOR_ALLOWED_MODELS", "").strip()
+
+    allowed_models = {m for m in [primary_model, fallback_model] if m}
+
+    if raw_allowed:
+        allowed_models.update(
+            model.strip()
+            for model in raw_allowed.split(",")
+            if model.strip()
+        )
+
+    return allowed_models
+
+
+def resolve_requested_model(requested_model: str | None) -> str:
+    primary_model, _ = get_tutor_models()
+
+    if not requested_model:
+        return primary_model
+
+    requested_model = requested_model.strip()
+    allowed_models = get_allowed_tutor_models()
+
+    if requested_model in allowed_models:
+        return requested_model
+
+    print(
+        f"[Storm44] Requested tutor model not allowed: {requested_model}. "
+        f"Using default primary model: {primary_model}"
+    )
+    return primary_model
+#---------------------------
 
 def format_time(seconds: Any) -> str:
     if seconds is None:
@@ -121,8 +170,12 @@ def build_study_tool_context(
 
     return "\n\n" + "\n\n".join(chunks)
 
-
-def generate_grounded_answer(question: str, context: str) -> str:
+# -----------------------------------------------------------------------------
+def generate_grounded_answer_with_model(
+    question: str,
+    context: str,
+    model_name: str
+) -> str:
     client = OpenAI()
 
     system_prompt = """
@@ -151,7 +204,7 @@ Study Context:
 """.strip()
 
     response = client.responses.create(
-        model=MODEL_NAME,
+        model=model_name,
         input=[
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_prompt},
@@ -161,9 +214,43 @@ Study Context:
     answer = (response.output_text or "").strip()
 
     if not answer:
-        return REFUSAL_MESSAGE
+        raise ValueError(f"No answer returned from model: {model_name}")
 
     return answer
+
+
+def generate_grounded_answer(
+    question: str,
+    context: str,
+    requested_model: str | None = None
+) -> tuple[str, str | None]:
+    primary_model, fallback_model = get_tutor_models()
+    selected_model = resolve_requested_model(requested_model)
+
+    models_to_try = [selected_model]
+
+    if primary_model and primary_model not in models_to_try:
+        models_to_try.append(primary_model)
+
+    if fallback_model and fallback_model not in models_to_try:
+        models_to_try.append(fallback_model)
+
+    last_error = None
+
+    for model_name in models_to_try:
+        try:
+            print(f"[Storm44] Trying tutor model: {model_name}")
+            answer = generate_grounded_answer_with_model(question, context, model_name)
+            print(f"[Storm44] Tutor model succeeded: {model_name}")
+            return answer, model_name
+        except Exception as e:
+            print(f"[Storm44] Tutor model failed: {model_name} -> {e}")
+            last_error = e
+
+    print(f"[Storm44] All tutor models failed. Last error: {last_error}")
+    return REFUSAL_MESSAGE, None
+#-------------------------------------------------------------------------------------------
+
 
 def generate_flashcards_from_context(topic: str, context: str, count: int) -> List[Dict[str, str]]:
     client = OpenAI()
@@ -323,48 +410,28 @@ Generate exactly {count} quiz questions.
         return []
     
 
-
-def answer_question(question: str, k: int = 3) -> str:
+#-------------------------------------------------------------------------------------------
+def answer_question(
+    question: str,
+    k: int = 3,
+    requested_model: str | None = None
+) -> str:
     results = top_k(question, k=k)
 
     if not results:
         return "Answer:\nI could not find any relevant sources.\n\nSources:\n"
 
     context = build_context(results)
-    answer = generate_grounded_answer(question, context)
+    answer, model_used = generate_grounded_answer(
+        question,
+        context,
+        requested_model=requested_model
+    )
     sources = build_sources(results)
 
     return f"Answer:\n{answer}\n\nSources:\n{sources}"
+#-------------------------------------------------------------------------------------------
 
-def answer_question_structured(question: str, k: int = 3) -> Dict[str, Any]:
-    results = top_k(question, k=k)
-
-# Backend version of answer_question().
-# Returns structured JSON-like data instead of one formatted string.
-
-    if not results:
-        return {
-            "answer": REFUSAL_MESSAGE,
-            "citations": [],
-        }
-    
-    context = build_context(results)
-    answer = generate_grounded_answer(question, context)
-
-    citations = []
-    for r in results:
-        citations.append({
-            "source_id": r.get("video_id") or r.get("source_file") or "unknown",
-            "chunk_id": str(r.get("chunk_id")) if r.get("chunk_id") is not None else None,
-            "snippet": (r.get("text") or "")[:180],
-            "start_seconds": r.get("start_time"),
-            "url": r.get("url"),
-        })
-
-    return {
-        "answer": answer,
-        "citations": citations,
-    }
 
 def generate_flashcards_structured(
     topic: str,
@@ -649,21 +716,21 @@ def has_enough_topic_support(question: str, results: List[Dict[str, Any]]) -> bo
     return False
 
 
-
-def answer_question_structured(question: str, k: int = 3) -> Dict[str, Any]:
+#-------------------------------------------------------------------------------------------
+def answer_question_structured(
+    question: str,
+    k: int = 3,
+    requested_model: str | None = None
+) -> Dict[str, Any]:
     results = top_k(question, k=k)
-
-
-# Backend version of answer_question().
-# Returns structured JSON-like data instead of one formatted string.
 
     if not results:
         return {
             "answer": REFUSAL_MESSAGE,
             "citations": [],
+            "model_used": None,
         }
 
-    
     best_rerank = results[0].get("rerank_score", 0.0) or 0.0
     q_lower = question.lower().strip()
 
@@ -674,27 +741,33 @@ def answer_question_structured(question: str, k: int = 3) -> Dict[str, Any]:
         return {
             "answer": REFUSAL_MESSAGE,
             "citations": [],
+            "model_used": None,
         }
 
     if is_definition_style_question(q_lower) and not has_definition_support:
         return {
             "answer": REFUSAL_MESSAGE,
             "citations": [],
+            "model_used": None,
         }
 
     if is_broad_topic_prompt(q_lower) and not has_topic_support:
         return {
             "answer": REFUSAL_MESSAGE,
             "citations": [],
+            "model_used": None,
         }
-    
 
     context = build_context(results)
-    answer = generate_grounded_answer(question, context)
+    answer, model_used = generate_grounded_answer(
+        question,
+        context,
+        requested_model=requested_model
+    )
 
-    citations = []  
-    for r in results[:2]:   # Only include top 2 citations for brevity and relevance. for citation quality improvement
-        citations.append({  
+    citations = []
+    for r in results[:2]:
+        citations.append({
             "source_id": r.get("video_id") or r.get("source_file") or "unknown",
             "chunk_id": str(r.get("chunk_id")) if r.get("chunk_id") is not None else None,
             "snippet": best_snippet_for_query(question, r.get("text") or ""),
@@ -705,7 +778,10 @@ def answer_question_structured(question: str, k: int = 3) -> Dict[str, Any]:
     return {
         "answer": answer,
         "citations": citations,
+        "model_used": model_used,
     }
+#-------------------------------------------------------------------------------------------
+
 
 def main() -> None:
     q = input("Question: ").strip()

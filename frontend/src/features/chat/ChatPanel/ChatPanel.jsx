@@ -41,12 +41,44 @@ function ChatPanel() {
   const [messages, setMessages] = useState([INITIAL_MESSAGE]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [availableModels, setAvailableModels] = useState([]);
+  const [selectedModel, setSelectedModel] = useState('');
+  const [modelLoadError, setModelLoadError] = useState('');
   const messagesEndRef = useRef(null);
   const textareaRef = useRef(null);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+
+
+  useEffect(() => {
+  const loadTutorModels = async () => {
+    try {
+      const response = await fetch(`${BACKEND_API_URL}/api/v1/ask/models`);
+
+      if (!response.ok) {
+        throw new Error(`Failed to load models: ${response.status}`);
+      }
+
+      const data = await response.json();
+      const models = data?.allowed_models || [];
+
+      setAvailableModels(models);
+      setSelectedModel(data?.default_model || models[0] || '');
+      setModelLoadError('');
+    } catch (error) {
+      console.error('Failed to load tutor models:', error);
+
+      // Safe local fallback so the UI still works during development
+      setAvailableModels(['gpt-5-mini', 'gpt-4.1-mini']);
+      setSelectedModel('gpt-5-mini');
+      setModelLoadError('Using default model list');
+    }
+  };
+
+  loadTutorModels();
+}, []);
 
   const resizeTextarea = () => {
     const textarea = textareaRef.current;
@@ -93,6 +125,7 @@ function ChatPanel() {
         query: userMessage.content,
         source_ids: [], // later: pass selected sources from UI
         top_k: 5,       // later: allow UI to control this
+        model: selectedModel || undefined,
       }),
     });
 
@@ -119,6 +152,7 @@ function ChatPanel() {
         content,
         timestamp: new Date().toISOString(),
         citations: data?.citations || [],
+        modelUsed: data?.model_used || null,
       },
     ]);
   } catch (error) {
@@ -171,6 +205,11 @@ function ChatPanel() {
               </div>
               <div className="message__meta">
                 <span className="message__time">{formatTime(message.timestamp)}</span>
+
+                {message.role === 'assistant' && message.modelUsed && (
+                  <span className="message__model">Model: {message.modelUsed}</span>
+                )}
+
                 {message.role === 'assistant' && (
                   <div className="message__actions">
                     <IconButton variant="ghost" size="sm" label="Copy">
@@ -211,6 +250,30 @@ function ChatPanel() {
 
       {/* Composer */}
       <div className="chat-panel__composer">
+        <div className="chat-panel__model-row">
+          <label htmlFor="tutor-model" className="chat-panel__model-label">
+            Tutor model
+          </label>
+
+          <select
+            id="tutor-model"
+            className="chat-panel__model-select"
+            value={selectedModel}
+            onChange={(e) => setSelectedModel(e.target.value)}
+            disabled={isLoading || availableModels.length === 0}
+          >
+            {availableModels.map((model) => (
+              <option key={model} value={model}>
+                {model}
+              </option>
+            ))}
+          </select>
+
+          {modelLoadError && (
+            <span className="chat-panel__model-warning">{modelLoadError}</span>
+          )}
+        </div>
+
         <div className="composer">
           <textarea
             ref={textareaRef}
